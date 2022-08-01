@@ -1,17 +1,27 @@
 # NexDome firmware for Arduino
 
+## Developemnt Environment - OpenAstroDome
+### Currently Under Developemnt
+This fork has been modified to compile using [VisualStudio Code](https://code.visualstudio.com/), [PlatformIO](https://platformio.org/) It utilizes regular DC motors, PWM Motor Controllers and with an encoder to check position of the rotator.
+
+- Open the workspace in VSCode <b><i>File->Open Workspace From File</i></b>
+- Open <i><b> OpenAstroDome.code-workspace</i></b> in the root of the repository
+- Select the target project and build/upload as you normaly would
+![image info](./assets/VSCode_Project_Select.jpg)
+
+## Current hardware support in development
+- LDP3806-600bm-G5-24C Encoder
+- 2x Arduino Mega 2560
+- 2x XBee S2C ZigBee
+- DC Motor Driver Shield for Arduino MD10 OR BTS7960
+
+# Original Readme
+
 This firmware was professionally developed for [NexDome] by [Tigra Astronomy][tigra]. The code is open-source and is licensed under the [Tigra Astronomy MIT license][license].
 
 ## Table of Contents {ignore=true}
 
 [TOC]
-
-## Developemnt Environment - OpenAstroDome
-This fork has been modified to compile using VisualStudio Code and PlatformIO and to utilize regular DC motors, PWM controllers and with an encoder to check position of the rotator.
-
-- Open the workspace in VSCode <b><i>File->Open Workspace From File</i></b>
-- Select the target project and build/upload as you normaly would
-![image info](./assets/VSCode_Project_Select.jpg)
 
 ## Development Environment - Original Repository
 
