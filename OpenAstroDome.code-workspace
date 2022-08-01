@@ -1,0 +1,29 @@
+{
+	"folders": [
+		{
+			"path": "SharedLibs"
+		},
+		{
+			"path": "TA.NexDome.Rotator"
+		},
+		{
+			"path": "TA.NexDome.Shutter"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"vector": "cpp",
+			"deque": "cpp",
+			"initializer_list": "cpp",
+			"list": "cpp",
+			"valarray": "cpp",
+			"xhash": "cpp",
+			"xstring": "cpp",
+			"xtree": "cpp",
+			"xutility": "cpp",
+			"associative_base": "cpp",
+			"iterator": "cpp",
+			"serstream": "cpp"
+		}
+	}
+}

@@ -6,7 +6,14 @@ This firmware was professionally developed for [NexDome] by [Tigra Astronomy][ti
 
 [TOC]
 
-## Development Environment
+## Developemnt Environment - OpenAstroDome
+This fork has been modified to compile using VisualStudio Code and PlatformIO and to utilize regular DC motors, PWM controllers and with an encoder to check position of the rotator.
+
+- Open the workspace in VSCode <b><i>File->Open Workspace From File</i></b>
+- Select the target project and build/upload as you normaly would
+![image info](./assets/VSCode_Project_Select.jpg)
+
+## Development Environment - Original Repository
 
 The Arduino IDE is great for casual experimentation but is rather limiting for serious software development. This project was developed using Microsoft Visual Studio, with the VisualMicro Arduino extension, which makes it easy to have _local libraries_ and _shared code projects_ and reference them in exactly the same way you would in a C# project, without having to install the library or move it to some aesoteric location.
 
