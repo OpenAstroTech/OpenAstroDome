@@ -1,7 +1,5 @@
 #include "BTS7960Controller.h"
 
-namespace BTS7960
-{
 BTS7960::BTS7960(uint8_t L_EN, uint8_t R_EN, uint8_t L_PWM, uint8_t R_PWM)
 {
     _R_PWM = R_PWM;
@@ -12,20 +10,22 @@ BTS7960::BTS7960(uint8_t L_EN, uint8_t R_EN, uint8_t L_PWM, uint8_t R_PWM)
     pinMode(_L_PWM, OUTPUT);
     pinMode(_L_EN, OUTPUT);
     pinMode(_R_EN, OUTPUT);
+    _isRunning = false;
 }
 
-void BTS7960::TurnRight(uint8_t pwm)
+void BTS7960::run(int dir, int pwm)
 {
-    analogWrite(_L_PWM, 0);
-    delayMicroseconds(100);
-    analogWrite(_R_PWM, pwm);
-}
-
-void BTS7960::TurnLeft(uint8_t pwm)
-{
-    analogWrite(_R_PWM, 0);
-    delayMicroseconds(100);
-    analogWrite(_L_PWM, pwm);
+    Enable();
+    if (dir = 0){
+        analogWrite(_L_PWM, 0);
+        delayMicroseconds(100);
+        analogWrite(_R_PWM, pwm);
+    } else if (dir = 1){
+        analogWrite(_R_PWM, 0);
+        delayMicroseconds(100);
+        analogWrite(_L_PWM, pwm);
+    }
+    _isRunning = true;
 }
 
 void BTS7960::Enable()
@@ -44,65 +44,20 @@ void BTS7960::Disable()
         digitalWrite(_R_EN, LOW);
 }
 
-void BTS7960::Stop()
+void BTS7960::stop()
 {
     analogWrite(_L_PWM, LOW);
     analogWrite(_R_PWM, LOW);
-}
-
-Motor::Motor()
-{
+    Disable();
     _isRunning = false;
 }
 
-void Motor::setup()
-{
-    motorController = new BTS7960(MOTOR_ENABLE_PIN_R, MOTOR_ENABLE_PIN_L, MOTOR_PWM_PIN_R, MOTOR_PWM_PIN_L);
-    motorController->Enable();
-}
-
-void Motor::run(int dir, int pwm)  // dir is 0 or 1
-{
-    // 0 = Clockwise
-    // 1 = Counter Clockwise
-    switch (dir)
-    {
-        case 0:
-            motorController->Enable();
-            motorController->TurnRight(pwm);
-            _isRunning = true;
-            break;
-
-        case 1:
-            motorController->Enable();
-            motorController->TurnLeft(pwm);
-            _isRunning = true;
-            break;
-        default:
-            break;
-    }
-}
-
-void Motor::stop()
-{
-    motorController->Stop();
-    motorController->Disable();
-    _isRunning = false;
-}
-
-void Motor::brake()
-{
-    motorController->Stop();
-    _isRunning = false;
-}
-
-bool Motor::isRunning()
+bool BTS7960::isRunning()
 {
     return _isRunning;
 }
 
-int Motor::readCurrent()
+int BTS7960::readCurrent()
 {
     return 0;
-}
 }

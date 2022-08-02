@@ -9,7 +9,7 @@
   #include "WProgram.h"
 #endif
 
-#include <AdvancedStepper.h>
+#include "Motors/Motor.h"
 #include <XBeeStateMachine.h>
 #include "Command.h"
 #include "Response.h"
@@ -19,7 +19,7 @@ struct PersistentSettings;
 class CommandProcessor
 	{
 public:
-	CommandProcessor(MicrosteppingMotor& rotator, PersistentSettings& settings, XBeeStateMachine& machine);
+	CommandProcessor(Motor& rotator, PersistentSettings& settings/*, XBeeStateMachine& machine*/);
 	static void responseToHost(const std::string& rxMessage);
 	void HandleCommand(const Command& command) const;
 	uint32_t getNormalizedPositionInMicrosteps() const;
@@ -62,7 +62,7 @@ private:
 	// Calculates the target microstep position using the shortest direction.
 	int32_t deltaSteps(uint32_t toMicrostepPosition) const;
 	int32_t getDeadZoneWholeSteps() const;
-	MicrosteppingMotor& rotator;
+	Motor& rotator;
 	PersistentSettings& settings;
 	SoftwareSerial* ttl;
 	XBeeStateMachine& machine;

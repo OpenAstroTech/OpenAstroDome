@@ -1,81 +1,36 @@
-#include "SHIELDMD10Controller.h"
+#include "Motors/Motor_DC/SHIELDMD10Controller.h"
 
-namespace SHIELDMD10
+SHIELDMD10::SHIELDMD10()
 {
-SHIELDMD10::SHIELDMD10(uint8_t PWM, uint8_t DIR)
-{
-    _PWM = PWM;
-    _DIR = DIR;
-    pinMode(_PWM, OUTPUT);
-    pinMode(_DIR, OUTPUT);
+    _isRunning = false;    
+    pinMode(MOTOR_DIRECTION_PIN, OUTPUT);
+    pinMode(MOTOR_PWM_PIN, OUTPUT);
 }
 
-void SHIELDMD10::TurnRight(uint8_t pwm)
+void SHIELDMD10::run(int dir, int pwm)  // dir is 0 or 1
 {
-    digitalWrite(_DIR, 0);
-    analogWrite(_PWM, pwm);
+    digitalWrite(MOTOR_DIRECTION_PIN, dir);
+    analogWrite(MOTOR_PWM_PIN, pwm);
+    _isRunning = true;
 }
-
-void SHIELDMD10::TurnLeft(uint8_t pwm)
+void SHIELDMD10::stop()
 {
-    digitalWrite(_DIR, 1);
-    analogWrite(_PWM, pwm);
-}
-
-void SHIELDMD10::Stop()
-{
-    analogWrite(_PWM, LOW);
-}
-
-Motor::Motor()
-{
+    analogWrite(MOTOR_PWM_PIN, LOW);
     _isRunning = false;
 }
 
-void Motor::setup()
+void SHIELDMD10::brake()
 {
-    motorController = new SHIELDMD10(MOTOR_DIRECTION_PIN, MOTOR_PWM_PIN);
-}
-
-void Motor::run(int dir, int pwm)  // dir is 0 or 1
-{
-    // 0 = Clockwise
-    // 1 = Counter Clockwise
-    switch (dir)
-    {
-        case 0:
-            motorController->TurnRight(pwm);
-            _isRunning = true;
-            break;
-
-        case 1:
-            motorController->TurnLeft(pwm);
-            _isRunning = true;
-            break;
-        default:
-            break;
-    }
-}
-
-void Motor::stop()
-{
-    motorController->Stop();
+    analogWrite(MOTOR_PWM_PIN, LOW);
     _isRunning = false;
 }
 
-void Motor::brake()
-{
-    motorController->Stop();
-    _isRunning = false;
-}
-
-bool Motor::isRunning()
+bool SHIELDMD10::isRunning()
 {
     return _isRunning;
 }
 
-int Motor::readCurrent()
+int SHIELDMD10::readCurrent()
 {
     return 0;
 }
-}  // namespace SHIELDMD10

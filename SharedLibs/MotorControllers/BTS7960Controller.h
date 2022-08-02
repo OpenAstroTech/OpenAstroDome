@@ -1,10 +1,8 @@
 #pragma once
 
 #include <Arduino.h>
-#include "NexDome.h"
+#include "Configuration/NexDome.h"
 
-namespace BTS7960
-{
 class BTS7960
 {
   public:
@@ -14,23 +12,6 @@ class BTS7960
     BTS7960(uint8_t L_EN, uint8_t R_EN, uint8_t L_PWM, uint8_t R_PWM);
     void Enable();
     void Disable();
-
-    void TurnLeft(uint8_t pwm);
-    void TurnRight(uint8_t pwm);
-    void Stop();
-
-  private:
-    uint8_t _L_EN;
-    uint8_t _R_EN;
-    uint8_t _L_PWM;
-    uint8_t _R_PWM;
-};
-
-class Motor
-{
-  public:
-    Motor();
-    void setup();
     void run(int dir, int pwm);
     void stop();
     void brake();
@@ -38,8 +19,9 @@ class Motor
     int readCurrent();
 
   private:
+    uint8_t _L_EN;
+    uint8_t _R_EN;
+    uint8_t _L_PWM;
+    uint8_t _R_PWM;
     bool _isRunning;
-    uint8_t _nmotor;
-    BTS7960 *motorController;
 };
-}

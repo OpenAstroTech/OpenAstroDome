@@ -26,8 +26,11 @@ void onMotorStopped();
 // Global scope data
 auto stepGenerator = CounterTimer1StepGenerator();
 auto settings = PersistentSettings::Load();
-//auto stepper = DCMotor(MOTOR_STEP_PIN, MOTOR_ENABLE_PIN, MOTOR_DIRECTION_PIN, stepGenerator, settings.motor);
+#if MOTOR_TYPE == STEPPER_MOTOR
 auto stepper = MicrosteppingMotor(MOTOR_STEP_PIN, MOTOR_ENABLE_PIN, MOTOR_DIRECTION_PIN, stepGenerator, settings.motor);
+#elif MOTOR_TYPE == DC_MOTOR
+auto stepper = DCMotor(MOTOR_STEP_PIN, MOTOR_ENABLE_PIN, MOTOR_DIRECTION_PIN, stepGenerator, settings.motor);
+#endif
 auto &xbeeSerial = Serial1;
 HardwareSerial host(Serial);
 std::string hostReceiveBuffer;

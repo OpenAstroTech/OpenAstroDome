@@ -1,28 +1,12 @@
 #pragma once
 
 #include <Arduino.h>
-#include "NexDome.h"
+#include "Configuration/NexDome.h"
 
-namespace SHIELDMD10
-{
 class SHIELDMD10
 {
   public:
-    SHIELDMD10(uint8_t PWM, uint8_t DIR);
-    void TurnLeft(uint8_t pwm);
-    void TurnRight(uint8_t pwm);
-    void Stop();
-
-  private:
-    uint8_t _DIR;
-    uint8_t _PWM;
-};
-
-class Motor
-{
-  public:
-    Motor();
-    void setup();
+    SHIELDMD10();
     void run(int dir, int pwm);
     void stop();
     void brake();
@@ -31,7 +15,4 @@ class Motor
 
   private:
     bool _isRunning;
-    uint8_t _nmotor;
-    SHIELDMD10 *motorController;
 };
-}

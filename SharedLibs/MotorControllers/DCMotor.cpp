@@ -1,30 +1,59 @@
 #include "DCMotor.h"
 
 DCMotor::DCMotor(uint8_t stepPin, uint8_t enablePin, uint8_t directionPin, IStepGenerator& stepper, MotorSettings& settings)
-{
-	//the DCMotor class is made of an encoder and a PWM motor controller board. Inputs and functions are to emulate that of a stepper motor. Each "step" will increment the desired encoder position in the PID control loop
+	{
+		//the DCMotor class is made of an encoder and a PWM motor controller board. Inputs and functions are to emulate that of a stepper motor. Each "step" will increment the desired encoder position in the PID control loop
 
-	#if MOTOR_BOARD == MOTOR_CONTROLLER_BTS7960
-		_rotator = new BTS7960::Motor();
-	#elif MOTOR_BOARD == MOTOR_CONTROLLER_SHIELDMD10
-		_rotator = new SHIELDMD10::Motor();
-	#endif
-	configuration = &settings;
-	currentVelocity = 0;
-    targetPosition = 0;
-	minSpeed = MIN_SPEED;
-	stopHandler = nullptr;
-	_encoder = new Encoder(configuration->currentPosition, ENCODER_PIN_A, ENCODER_PIN_B);
-}
+		#if MOTOR_BOARD == MOTOR_CONTROLLER_BTS7960
+			_rotator = new BTS7960::Motor();
+		#elif MOTOR_BOARD == MOTOR_CONTROLLER_SHIELDMD10
+			_rotator = new SHIELDMD10();
+		#endif
+		configuration = &settings;
+		currentVelocity = 0;
+		targetPosition = configuration->currentPosition;
+		positionError = 0;
+		previousTime = 0;
+		integralError = 0;
+		minSpeed = MIN_SPEED;
+		stopHandler = nullptr;
+		accelerationPID.DCMOTOR_kp = DCMOTOR_kp_A;
+		accelerationPID.DCMOTOR_ki = DCMOTOR_ki_A;
+		accelerationPID.DCMOTOR_kd = DCMOTOR_kd_A;
+		runPID.DCMOTOR_kp = DCMOTOR_kp_R;
+		runPID.DCMOTOR_ki = DCMOTOR_ki_R;
+		runPID.DCMOTOR_kd = DCMOTOR_kd_R;
+		_encoder = new Encoder(configuration->currentPosition, ENCODER_PIN_A, ENCODER_PIN_B);
+	}
 
-/*
-The Step method will be called from an interrupt service routine, so
-operations must be as short as possible and modify as little state as possible.
-*/
 void DCMotor::Step(bool state)
-{
-    //Each step should increment the targetPosition of the motor PID control loop. THe main program loop will need to repeatedly call a function to adjust the PWM based on the PID settings
-}
+	{
+		// Not used
+	}
+
+PWMSettings DCMotor::calcFromPID(int32_t currentPosition, PIDSettings PIDConstants)
+	{
+		// positional error
+		int32_t currentPositionError = targetPosition - currentPosition;
+
+		// time difference
+		long currentTime = micros();
+		float deltaTime = ((float) (currentTime - previousTime))/( 1.0e6 );
+		previousTime = currentTime;
+		// derivative error
+		float derivativeError = (currentPositionError-positionError)/(deltaTime);
+		// integral error
+		integralError = integralError + currentPositionError*deltaTime;
+		// store previous error for future calculation
+		positionError = currentPositionError;
+		// control signal
+		PWMSettings pwm;
+		pwm.pwm = PIDConstants.DCMOTOR_kp*currentPositionError + PIDConstants.DCMOTOR_kd*derivativeError + PIDConstants.DCMOTOR_ki*integralError;
+		pwm.dir = 0;
+		if (pwm.pwm < 0)
+			pwm.dir = 1;
+		return pwm;
+	}
 
 // Energizes the motor coils (applies holding torque) and prepares for stepping.
 // Takes account of direction reversal.
@@ -52,11 +81,6 @@ void DCMotor::setRampTime(uint16_t milliseconds)
 	configuration->rampTimeMilliseconds = milliseconds;
 	}
 
-
-
-
-
-
 /*
 	Configures the motor to move to an absolute step position. Unless interrupted,
 	the motor will commence stepping at minSpeed and will accelerate uniformly
@@ -66,26 +90,24 @@ void DCMotor::setRampTime(uint16_t milliseconds)
 */
 void DCMotor::moveToPosition(int32_t position)
 	{
-	const int32_t deltaPosition = position - *configuration->currentPosition;
+	positionError = position - getCurrentPosition();
 	targetPosition = position;
-	direction = sgn(deltaPosition);
+	direction = sgn(positionError);
 	targetVelocity = configuration->maxSpeed * direction;
 	currentAcceleration = accelerationFromRampTime() * direction;
-	energizeMotor();
 	startTime = millis();
-
+	previousTime = startTime;
+	integralError = 0;
 	if (abs(currentVelocity) < minSpeed)
 		{
 		// Starting from rest
 		startVelocity = minSpeed * direction;
 		currentVelocity = startVelocity;
-		stepGenerator->start(minSpeed, this);
 		}
 	else
 		{
 		// Starting with the motor already in motion
 		startVelocity = currentVelocity;
-		stepGenerator->setStepRate(abs(startVelocity));
 		}
 	}
 
@@ -94,7 +116,7 @@ void DCMotor::moveToPosition(int32_t position)
 */
 void DCMotor::SetCurrentPosition(int32_t position)
 	{
-	configuration->currentPosition = &position;
+	configuration->currentPosition = position;
 	}
 
 /*
@@ -123,7 +145,12 @@ float DCMotor::getCurrentVelocity() const
 */
 int32_t DCMotor::getCurrentPosition()
 	{
-	return *configuration->currentPosition;
+	return configuration->currentPosition;
+	}
+
+int32_t DCMotor::getTargetPosition()
+	{
+	return targetPosition;
 	}
 
 int32_t DCMotor::midpointPosition() const
@@ -229,12 +256,10 @@ float DCMotor::getDeceleratedVelocity() const
 */
 void DCMotor::hardStop()
 	{
-	stepGenerator->stop();
+	_rotator->stop();
 	currentAcceleration = 0;
 	currentVelocity = 0;
 	direction = 0;
-	if (!configuration->useHoldingTorque)
-		releaseMotor();
 	if (stopHandler != nullptr)
 		stopHandler();
 	}
@@ -266,5 +291,18 @@ void DCMotor::ComputeAcceleratedVelocity()
 	const float computedSpeed = min(abs(accelerationCurve), abs(decelerationCurve));
 	const float constrainedSpeed = constrain(computedSpeed, minSpeed, configuration->maxSpeed);
 	currentVelocity = constrainedSpeed * direction;
-	stepGenerator->setStepRate(constrainedSpeed);	// Step rate must be positive
+	int32_t currentPosition = getCurrentPosition();
+	int32_t currentPositionError = targetPosition - currentPosition;
+	PIDSettings PIDConstants;
+	if (millis() < (configuration->rampTimeMilliseconds + startTime)) // Use acceleration PID settings when ramping up
+		PIDConstants = accelerationPID;
+	else
+		PIDConstants = runPID;
+	if (abs(targetPosition - currentPosition) > ROTATOR_DEFAULT_DEADZONE){
+		pwm = calcFromPID(currentPosition, PIDConstants);
+		pwm.pwm = constrain(abs(pwm.pwm), MOTOR_MIN_PWM, 255);
+		_rotator->run(pwm.dir,static_cast<int>(pwm.pwm));
+	} else {
+		hardStop();
+	}
 	}

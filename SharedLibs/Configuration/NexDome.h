@@ -12,6 +12,7 @@
 constexpr int32_t MaxStepPosition = 2000000000L;
 constexpr int32_t MinStepPosition = -2000000000L;
 
+#define MOTOR_TYPE  (DC_MOTOR) // See Constants.h for options
 // Motor Parameters
 #define MICROSTEPS_PER_STEP (8) // Should match DIP switches on stepper driver
 #define MIN_SPEED (250)         // Minimum speed that can be timed by the hardware timer
@@ -21,6 +22,15 @@ constexpr int32_t MinStepPosition = -2000000000L;
 #define MOTOR_BOARD     (MOTOR_CONTROLLER_SHIELDMD10)
 #define ENCODER_PIN_A    (2)   // Encoder
 #define ENCODER_PIN_B    (3)   // Encoder
+#define MOTOR_MIN_PWM   (60)    // Minimum PWM setting needed to move the motor
+// Acceleration PID constants
+const float DCMOTOR_kp_A = 0.00;
+const float DCMOTOR_ki_A = 0.2;
+const float DCMOTOR_kd_A = 0.00;
+// Running PID constants
+const float DCMOTOR_kp_R = 0.5;
+const float DCMOTOR_ki_R = 0.0;
+const float DCMOTOR_kd_R = 0.02;
 // BTS7960
 #define MOTOR_ENABLE_PIN_L  (7)
 #define MOTOR_ENABLE_PIN_R  (8)
@@ -40,10 +50,12 @@ constexpr int32_t MinStepPosition = -2000000000L;
 #define SHUTTER_DEFAULT_SPEED (800 * MICROSTEPS_PER_STEP)
 #define SHUTTER_FULL_OPEN_DEFAULT (46000UL * MICROSTEPS_PER_STEP)
 #define SHUTTER_LIMIT_STOPPING_DISTANCE (100 * MICROSTEPS_PER_STEP)
-#define ROTATOR_FULL_REVOLUTION_MICROSTEPS (440640)
+//#define ROTATOR_FULL_REVOLUTION_MICROSTEPS (440640)
+#define ROTATOR_FULL_REVOLUTION_MICROSTEPS (10000)
 #define ROTATOR_MAX_POSITION (MaxStepPosition)
 #define ROTATOR_HOME_POSITION (0)
-#define ROTATOR_DEFAULT_DEADZONE (75 * MICROSTEPS_PER_STEP)	// default dead-zone in microsteps (~0.5°)
+//#define ROTATOR_DEFAULT_DEADZONE (75 * MICROSTEPS_PER_STEP)	// default dead-zone in microsteps (~0.5°)
+#define ROTATOR_DEFAULT_DEADZONE (50)	// default dead-zone in microsteps (~0.5°)
 
 #define HOST_SERIAL_RX_BUFFER_SIZE (16) // Receive buffer for PC/USB communications
 

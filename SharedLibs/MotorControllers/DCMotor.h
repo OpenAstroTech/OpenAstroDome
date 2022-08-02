@@ -1,37 +1,39 @@
 // Motor.h
 
-#ifndef _MicrosteppingMotor_h
-#define _MicrosteppingMotor_h
+#ifndef _DCMotor_h
+#define _DCMotor_h
 
 #if defined(ARDUINO) && ARDUINO >= 100
-#include "Arduino.h"
+#include <Arduino.h>
 #else
 #include "WProgram.h"
 #endif
-#include "NexDome.h"
-#include "IStepSequencer.h"
-#include "IStepGenerator.h"
+#include "Configuration/NexDome.h"
 #include "Encoder.h"
+#include "Motors/Motor.h"
 
 #if MOTOR_BOARD == MOTOR_CONTROLLER_BTS7960
 #include "BTS7960Controller.h"
 #elif MOTOR_BOARD == MOTOR_CONTROLLER_SHIELDMD10
-#include "SHIELDMD10Controller.h"
+#include "Motors/Motor_DC/SHIELDMD10Controller.h"
 #endif
-
-struct MotorSettings
-	{
-	uint32_t maxPosition;				// limit of travel, in steps
-	volatile int32_t *currentPosition;	// the current position (potentially updated by ISR)
-	uint16_t rampTimeMilliseconds;		// milliseconds to ramp from minSpeed to maxSpeed
-	uint16_t maxSpeed;					// maximum number of steps per second
-	bool directionReversed;				// If true, reverses the rotation direction with respect to the step position
-	bool useHoldingTorque;				// Apply holding torque after motor stops (otherwise de-energize the coils)
-	};
 
 typedef void (*StopHandler) ();
 
-class DCMotor : public IStepSequencer
+struct PIDSettings
+	{
+		float DCMOTOR_kp;
+		float DCMOTOR_ki;
+		float DCMOTOR_kd;
+	};
+
+struct PWMSettings
+	{
+		float pwm;
+		bool dir;
+	};
+
+class DCMotor : public Motor
 	{
 	public:
 		DCMotor(uint8_t stepPin, uint8_t enablePin, uint8_t directionPin, IStepGenerator& stepper, MotorSettings& settings);
@@ -58,15 +60,14 @@ class DCMotor : public IStepSequencer
 		virtual bool isMoving();
 		virtual int8_t getCurrentDirection();
 		int32_t distanceToStop() const;
-
-	protected:
 		MotorSettings* configuration;
+		int32_t getTargetPosition();
 
 	private:
 		#if MOTOR_BOARD == MOTOR_CONTROLLER_BTS7960
 			BTS7960::Motor* _rotator;
 		#elif MOTOR_BOARD == MOTOR_CONTROLLER_SHIELDMD10
-			SHIELDMD10::Motor* _rotator;
+			SHIELDMD10* _rotator;
 		#endif
 		Encoder* _encoder;
 		IStepGenerator* stepGenerator;
@@ -79,6 +80,14 @@ class DCMotor : public IStepSequencer
 		float getDeceleratedVelocity() const;
 		float accelerationFromRampTime();
 		StopHandler stopHandler;
+		float positionError;
+		float previousTime;
+		float integralError;
+		PWMSettings calcFromPID(int32_t currentPosition, PIDSettings PIDConstants);
+		PIDSettings accelerationPID;
+		PIDSettings runPID;
+		PWMSettings pwm;
+		unsigned long PIDtimer;
 	};
 
 // Motor Parameters (defaults)
@@ -90,10 +99,5 @@ class DCMotor : public IStepSequencer
 #ifndef MIN_RAMP_TIME
 #define MIN_RAMP_TIME				(100)	// Minimum ramp up/down time in milliseconds
 #endif
-
-template <typename T> int sgn(T val)
-	{
-	return (T(0) < val) - (val < T(0));
-	}
 
 #endif
