@@ -1,4 +1,4 @@
-#include "Motors/Motor_DC/SHIELDMD10Controller.h"
+#include "SHIELDMD10Controller.h"
 
 SHIELDMD10::SHIELDMD10()
 {

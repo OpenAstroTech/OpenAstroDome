@@ -13,7 +13,7 @@
 #include "HomeSensor.h"
 
 #pragma region static fields used within interrupt service routines
-MicrosteppingMotor *HomeSensor::motor;
+Motor *HomeSensor::motor;
 Home *HomeSensor::homeSettings;
 uint8_t HomeSensor::sensorPin;
 volatile HomingPhase HomeSensor::phase;
@@ -25,7 +25,7 @@ volatile HomingPhase HomeSensor::phase;
  * Not all pins on all platforms support attaching interrupts.
  * Arduino Leonardo supports pins 0, 1, 2, 3, 7
  */
-HomeSensor::HomeSensor(MicrosteppingMotor *stepper, Home *settings, const uint8_t sensorPin, CommandProcessor &processor)
+HomeSensor::HomeSensor(Motor *stepper, Home *settings, const uint8_t sensorPin, CommandProcessor &processor)
 	: commandProcessor(processor)
 {
 	motor = stepper;

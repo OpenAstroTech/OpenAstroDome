@@ -9,7 +9,7 @@
 	#include "WProgram.h"
 #endif
 
-#include <AdvancedStepper.h>
+#include "../MotorControllers/Motor.h"
 #include "CommandProcessor.h"
 
 enum HomingPhase
@@ -33,7 +33,7 @@ struct Home
 class HomeSensor
 	{
 public:
-	HomeSensor(MicrosteppingMotor* stepper, Home* settings, uint8_t sensorPin, CommandProcessor & processor);
+	HomeSensor(Motor* stepper, Home* settings, uint8_t sensorPin, CommandProcessor & processor);
 	static void init();
 	static bool atHome();
 	static void findHome(int direction);
@@ -43,7 +43,7 @@ public:
 private:
 	static volatile HomingPhase phase;
 	static uint8_t sensorPin;
-	static MicrosteppingMotor* motor;
+	static Motor* motor;
 	static Home* homeSettings;
 	CommandProcessor& commandProcessor;
 	static void foundHome();

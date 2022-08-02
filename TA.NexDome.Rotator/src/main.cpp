@@ -7,6 +7,7 @@
 #include <ArduinoSTL.h>
 // #include <SafeSerial.h>
 #include <AdvancedStepper.h>
+#include "../MotorControllers/DCMotor.h"
 // #include <DCMotor.h>
 #include <XBeeApi.h>
 #include <Timer.h>
@@ -29,7 +30,7 @@ auto settings = PersistentSettings::Load();
 #if MOTOR_TYPE == STEPPER_MOTOR
 auto stepper = MicrosteppingMotor(MOTOR_STEP_PIN, MOTOR_ENABLE_PIN, MOTOR_DIRECTION_PIN, stepGenerator, settings.motor);
 #elif MOTOR_TYPE == DC_MOTOR
-auto stepper = DCMotor(MOTOR_STEP_PIN, MOTOR_ENABLE_PIN, MOTOR_DIRECTION_PIN, stepGenerator, settings.motor);
+auto stepper = DCMotor(MOTOR_STEP_PIN, MOTOR_ENABLE_PIN, MOTOR_DIRECTION_PIN, settings.motor);
 #endif
 auto &xbeeSerial = Serial1;
 HardwareSerial host(Serial);

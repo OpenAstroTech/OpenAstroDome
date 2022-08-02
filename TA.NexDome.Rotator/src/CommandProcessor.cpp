@@ -4,7 +4,7 @@
 #include "Version.h"
 #include <sstream>
 
-CommandProcessor::CommandProcessor(Motor& rotator, PersistentSettings& settings/*, XBeeStateMachine& machine*/)
+CommandProcessor::CommandProcessor(Motor& rotator, PersistentSettings& settings, XBeeStateMachine& machine)
 	: rotator(rotator), settings(settings), machine(machine) {}
 
 /*

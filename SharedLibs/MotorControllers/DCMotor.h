@@ -8,14 +8,14 @@
 #else
 #include "WProgram.h"
 #endif
-#include "Configuration/NexDome.h"
+#include "../Configuration/NexDome.h"
 #include "Encoder.h"
-#include "Motors/Motor.h"
+#include "Motor.h"
 
 #if MOTOR_BOARD == MOTOR_CONTROLLER_BTS7960
 #include "BTS7960Controller.h"
 #elif MOTOR_BOARD == MOTOR_CONTROLLER_SHIELDMD10
-#include "Motors/Motor_DC/SHIELDMD10Controller.h"
+#include "SHIELDMD10Controller.h"
 #endif
 
 typedef void (*StopHandler) ();
@@ -36,7 +36,7 @@ struct PWMSettings
 class DCMotor : public Motor
 	{
 	public:
-		DCMotor(uint8_t stepPin, uint8_t enablePin, uint8_t directionPin, IStepGenerator& stepper, MotorSettings& settings);
+		DCMotor(uint8_t stepPin, uint8_t enablePin, uint8_t directionPin, MotorSettings& settings);
 		virtual void Step(bool state) final;
 		//void MoveAtVelocity(float stepsPerSecond);
 		void energizeMotor() const;
@@ -70,7 +70,6 @@ class DCMotor : public Motor
 			SHIELDMD10* _rotator;
 		#endif
 		Encoder* _encoder;
-		IStepGenerator* stepGenerator;
 		int direction = +1;
 		int32_t targetPosition{};
 		unsigned long startTime{};

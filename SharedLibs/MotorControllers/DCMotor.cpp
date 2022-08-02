@@ -1,6 +1,6 @@
 #include "DCMotor.h"
 
-DCMotor::DCMotor(uint8_t stepPin, uint8_t enablePin, uint8_t directionPin, IStepGenerator& stepper, MotorSettings& settings)
+DCMotor::DCMotor(uint8_t stepPin, uint8_t enablePin, uint8_t directionPin, MotorSettings& settings)
 	{
 		//the DCMotor class is made of an encoder and a PWM motor controller board. Inputs and functions are to emulate that of a stepper motor. Each "step" will increment the desired encoder position in the PID control loop
 
