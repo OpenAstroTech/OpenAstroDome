@@ -3,6 +3,7 @@
 #pragma once
 #include <Arduino.h>
 #include <HardwareSerial.h>
+#include <SoftwareSerial.h>
 
 #include <ArduinoSTL.h>
 #include <XBeeApi.h>
@@ -25,7 +26,7 @@ class IXBeeState;
 class XBeeStateMachine
 {
 public:
-	XBeeStateMachine(HardwareSerial& xBeePort, XBeeApi& xbee);
+	XBeeStateMachine(SoftwareSerial& xBeePort, XBeeApi& xbee);
 	void Loop();
 	void ChangeState(IXBeeState* newState);
 void StateTransitionIfRequested();
@@ -44,7 +45,7 @@ private:
 	void copyAddress(const byte* source);
 	void printEscaped(byte data) const;
 	byte getNextFrameId();
-	HardwareSerial& xbeeSerial;
+	SoftwareSerial& xbeeSerial;
 	XBeeApi& xbeeApi;
 	std::vector<byte> remoteAddress;
 	IXBeeState* currentState = nullptr;

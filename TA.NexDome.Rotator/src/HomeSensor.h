@@ -9,7 +9,7 @@
 	#include "WProgram.h"
 #endif
 
-#include "../MotorControllers/Motor.h"
+#include "Motor.h"
 #include "CommandProcessor.h"
 
 enum HomingPhase

@@ -14,6 +14,8 @@
 #include "PersistentSettings.h"
 #include "LimitSwitch.h"
 #include "BatteryMonitor.h"
+// UNO SoftwareSerial
+#include "SoftwareSerial.h"
 
 void onMotorStopped(); // Forward reference
 
@@ -22,7 +24,8 @@ auto stepGenerator = CounterTimer1StepGenerator();
 auto settings = PersistentSettings::Load();
 auto stepper = MicrosteppingMotor(MOTOR_STEP_PIN, MOTOR_ENABLE_PIN, MOTOR_DIRECTION_PIN, stepGenerator, settings.motor);
 auto limitSwitches = LimitSwitch(&stepper, OPEN_LIMIT_SWITCH_PIN, CLOSED_LIMIT_SWITCH_PIN);
-auto &xbeeSerial = Serial1;
+// auto &xbeeSerial = Serial1; // Original
+auto xbeeSerial = SoftwareSerial(6,7); // UNO
 HardwareSerial host(Serial);
 std::string hostReceiveBuffer;
 std::vector<byte> xbeeApiRxBuffer;

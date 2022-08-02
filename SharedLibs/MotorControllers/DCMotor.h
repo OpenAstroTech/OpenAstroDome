@@ -8,7 +8,7 @@
 #else
 #include "WProgram.h"
 #endif
-#include "../Configuration/NexDome.h"
+#include "NexDome.h"
 #include "Encoder.h"
 #include "Motor.h"
 

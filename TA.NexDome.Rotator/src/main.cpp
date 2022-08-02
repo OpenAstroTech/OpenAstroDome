@@ -7,7 +7,7 @@
 #include <ArduinoSTL.h>
 // #include <SafeSerial.h>
 #include <AdvancedStepper.h>
-#include "../MotorControllers/DCMotor.h"
+#include "DCMotor.h"
 // #include <DCMotor.h>
 #include <XBeeApi.h>
 #include <Timer.h>
@@ -17,6 +17,8 @@
 #include "HomeSensor.h"
 #include "CommandProcessor.h"
 #include "XBeeStartupState.h"
+// UNO SoftwareSerial
+#include "SoftwareSerial.h"
 
 constexpr Duration SerialInactivityTimeout = Timer::Minutes(10);
 
@@ -32,7 +34,8 @@ auto stepper = MicrosteppingMotor(MOTOR_STEP_PIN, MOTOR_ENABLE_PIN, MOTOR_DIRECT
 #elif MOTOR_TYPE == DC_MOTOR
 auto stepper = DCMotor(MOTOR_STEP_PIN, MOTOR_ENABLE_PIN, MOTOR_DIRECTION_PIN, settings.motor);
 #endif
-auto &xbeeSerial = Serial1;
+//auto &xbeeSerial = Serial1;
+auto xbeeSerial = SoftwareSerial(6,7);
 HardwareSerial host(Serial);
 std::string hostReceiveBuffer;
 std::vector<byte> xbeeApiRxBuffer;

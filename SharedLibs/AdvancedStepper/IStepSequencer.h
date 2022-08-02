@@ -1,5 +1,5 @@
 #pragma once
-#include "../MotorControllers/Motor.h"
+#include "Motor.h"
 
 class IStepSequencer : public Motor
 	{
