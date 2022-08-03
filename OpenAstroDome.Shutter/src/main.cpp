@@ -4,6 +4,7 @@
 #include <sstream>
 // #include <SafeSerial.h>
 #include <AdvancedStepper.h>
+#include "DCMotor.h"
 #include <XBeeApi.h>
 #include "OpenAstroDome.h"
 #include "XBeeStatemachine.h"
@@ -22,7 +23,11 @@ void onMotorStopped(); // Forward reference
 Timer periodicTasks;
 auto stepGenerator = CounterTimer1StepGenerator();
 auto settings = PersistentSettings::Load();
+#if SHUTTER_MOTOR_TYPE == STEPPER_MOTOR
 auto stepper = MicrosteppingMotor(MOTOR_STEP_PIN, MOTOR_ENABLE_PIN, MOTOR_DIRECTION_PIN, stepGenerator, settings.motor);
+#elif SHUTTER_MOTOR_TYPE == DC_MOTOR
+auto stepper = DCMotor(MOTOR_STEP_PIN, MOTOR_ENABLE_PIN, MOTOR_DIRECTION_PIN, settings.motor);
+#endif
 auto limitSwitches = LimitSwitch(&stepper, OPEN_LIMIT_SWITCH_PIN, CLOSED_LIMIT_SWITCH_PIN);
 // auto &xbeeSerial = Serial1; // Original
 auto xbeeSerial = SoftwareSerial(6, 7); // UNO

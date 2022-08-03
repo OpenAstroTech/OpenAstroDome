@@ -7,10 +7,10 @@
 #include "OpenAstroDome.h"
 
 
-MicrosteppingMotor* LimitSwitch::motor;
+Motor* LimitSwitch::motor;
 volatile bool LimitSwitch::closeTriggered; // static and volatile because accessed in ISR
 
-LimitSwitch::LimitSwitch(MicrosteppingMotor* stepper, uint8_t openLimit, uint8_t closeLimit)
+LimitSwitch::LimitSwitch(Motor* stepper, uint8_t openLimit, uint8_t closeLimit)
 	: openLimitPin(openLimit), closedLimitPin(closeLimit)
 	{
 	LimitSwitch::motor = stepper;

@@ -29,9 +29,9 @@ void onMotorStopped();
 // Global scope data
 auto stepGenerator = CounterTimer1StepGenerator();
 auto settings = PersistentSettings::Load();
-#if MOTOR_TYPE == STEPPER_MOTOR
+#if ROTATOR_MOTOR_TYPE == STEPPER_MOTOR
 auto stepper = MicrosteppingMotor(MOTOR_STEP_PIN, MOTOR_ENABLE_PIN, MOTOR_DIRECTION_PIN, stepGenerator, settings.motor);
-#elif MOTOR_TYPE == DC_MOTOR
+#elif ROTATOR_MOTOR_TYPE == DC_MOTOR
 auto stepper = DCMotor(MOTOR_STEP_PIN, MOTOR_ENABLE_PIN, MOTOR_DIRECTION_PIN, settings.motor);
 #endif
 // auto &xbeeSerial = Serial1;

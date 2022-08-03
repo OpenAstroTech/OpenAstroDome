@@ -5,7 +5,7 @@
 #include "OpenAstroDome.h"
 #include "Version.h"
 
-CommandProcessor::CommandProcessor(MicrosteppingMotor &motor, PersistentSettings &settings, XBeeStateMachine& machine, LimitSwitch &limits, BatteryMonitor &monitor)
+CommandProcessor::CommandProcessor(Motor &motor, PersistentSettings &settings, XBeeStateMachine& machine, LimitSwitch &limits, BatteryMonitor &monitor)
 	: motor(motor), settings(settings), limitSwitches(limits), machine(machine), battery(monitor) {}
 
 int32_t CommandProcessor::microstepsToSteps(int32_t microsteps)

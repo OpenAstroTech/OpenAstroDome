@@ -14,4 +14,7 @@ class Motor
 		virtual uint16_t getMaximumSpeed();
 		virtual bool isMoving();
 		virtual void SoftStop();
+		virtual float getCurrentVelocity() const;
+		virtual void SetLimitOfTravel(uint32_t limit);
+		virtual int32_t limitOfTravel() const;
     };

@@ -9,12 +9,12 @@
 	#include "WProgram.h"
 #endif
 
-#include <AdvancedStepper.h>
+#include "Motor.h"
 
 class LimitSwitch
 	{
 	public:
-		LimitSwitch(MicrosteppingMotor* stepper, uint8_t openLimit, uint8_t closeLimit);
+		LimitSwitch(Motor* stepper, uint8_t openLimit, uint8_t closeLimit);
 		bool isOpen() const;
 		bool isClosed() const;
 		void init() const;
@@ -24,7 +24,7 @@ class LimitSwitch
 		uint8_t openLimitPin;
 		uint8_t closedLimitPin;
 		static volatile bool closeTriggered;
-		static MicrosteppingMotor* motor;
+		static Motor* motor;
 		static void onOpenLimitReached();
 		static void onCloseLimitReached();
 	};
