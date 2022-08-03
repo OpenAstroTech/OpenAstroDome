@@ -14,6 +14,8 @@
 #include "PersistentSettings.h"
 #include "LimitSwitch.h"
 #include "BatteryMonitor.h"
+// UNO SoftwareSerial
+#include "SoftwareSerial.h"
 
 void onMotorStopped(); // Forward reference
 
@@ -22,8 +24,9 @@ auto stepGenerator = CounterTimer1StepGenerator();
 auto settings = PersistentSettings::Load();
 auto stepper = MicrosteppingMotor(MOTOR_STEP_PIN, MOTOR_ENABLE_PIN, MOTOR_DIRECTION_PIN, stepGenerator, settings.motor);
 auto limitSwitches = LimitSwitch(&stepper, OPEN_LIMIT_SWITCH_PIN, CLOSED_LIMIT_SWITCH_PIN);
-auto &xbeeSerial = Serial1;
-HardwareSerial host(Serial);
+// auto &xbeeSerial = Serial1; // Original
+auto xbeeSerial = SoftwareSerial(6, 7); // UNO
+// HardwareSerial host(Serial);
 std::string hostReceiveBuffer;
 std::vector<byte> xbeeApiRxBuffer;
 void HandleFrameReceived(FrameType type, const std::vector<byte> &payload); // forward reference
@@ -79,33 +82,34 @@ void DispatchCommand(const Command &command)
 
 void HandleSerialCommunications()
 {
-	if (!host || host.available() <= 0)
-		return; // No data available.
-	const auto rx = host.read();
-	if (rx < 0)
-		return; // No data available.
-	const char rxChar = char(rx);
-	switch (rxChar)
+	while (Serial.available() > 0)
 	{
-	case '\n': // newline - dispatch the command
-	case '\r': // carriage return - dispatch the command
-		if (hostReceiveBuffer.length() > 1)
+		const auto rx = Serial.read();
+		if (rx < 0)
+			return; // No data available.
+		const char rxChar = char(rx);
+		switch (rxChar)
 		{
-			const auto command = Command(hostReceiveBuffer);
-			DispatchCommand(command);
-			if (ResponseBuilder::available())
-				std::cout << ResponseBuilder::Message << std::endl; // send response, if there is one.
+		case '\n': // newline - dispatch the command
+		case '\r': // carriage return - dispatch the command
+			if (hostReceiveBuffer.length() > 1)
+			{
+				const auto command = Command(hostReceiveBuffer);
+				DispatchCommand(command);
+				if (ResponseBuilder::available())
+					std::cout << ResponseBuilder::Message << std::endl; // send response, if there is one.
+				hostReceiveBuffer.clear();
+			}
+			break;
+		case '@': // Start of new command
 			hostReceiveBuffer.clear();
+		default:
+			if (hostReceiveBuffer.length() < HOST_SERIAL_RX_BUFFER_SIZE)
+			{
+				hostReceiveBuffer.push_back(rxChar);
+			}
+			break;
 		}
-		break;
-	case '@': // Start of new command
-		hostReceiveBuffer.clear();
-	default:
-		if (hostReceiveBuffer.length() < HOST_SERIAL_RX_BUFFER_SIZE)
-		{
-			hostReceiveBuffer.push_back(rxChar);
-		}
-		break;
 	}
 }
 

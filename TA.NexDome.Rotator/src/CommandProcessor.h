@@ -9,7 +9,7 @@
   #include "WProgram.h"
 #endif
 
-#include "../MotorControllers/Motor.h"
+#include "Motor.h"
 #include <XBeeStateMachine.h>
 #include "Command.h"
 #include "Response.h"

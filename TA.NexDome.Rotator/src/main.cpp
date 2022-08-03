@@ -7,7 +7,7 @@
 #include <ArduinoSTL.h>
 // #include <SafeSerial.h>
 #include <AdvancedStepper.h>
-#include "../MotorControllers/DCMotor.h"
+#include "DCMotor.h"
 // #include <DCMotor.h>
 #include <XBeeApi.h>
 #include <Timer.h>
@@ -17,6 +17,8 @@
 #include "HomeSensor.h"
 #include "CommandProcessor.h"
 #include "XBeeStartupState.h"
+// UNO SoftwareSerial
+#include "SoftwareSerial.h"
 
 constexpr Duration SerialInactivityTimeout = Timer::Minutes(10);
 
@@ -32,8 +34,9 @@ auto stepper = MicrosteppingMotor(MOTOR_STEP_PIN, MOTOR_ENABLE_PIN, MOTOR_DIRECT
 #elif MOTOR_TYPE == DC_MOTOR
 auto stepper = DCMotor(MOTOR_STEP_PIN, MOTOR_ENABLE_PIN, MOTOR_DIRECTION_PIN, settings.motor);
 #endif
-auto &xbeeSerial = Serial1;
-HardwareSerial host(Serial);
+// auto &xbeeSerial = Serial1;
+auto xbeeSerial = SoftwareSerial(6, 7);
+// HardwareSerial host(Serial);
 std::string hostReceiveBuffer;
 std::vector<byte> xbeeApiRxBuffer;
 auto xbeeApi = XBeeApi(xbeeSerial, xbeeApiRxBuffer, ReceiveHandler(onXbeeFrameReceived));
@@ -42,7 +45,7 @@ auto commandProcessor = CommandProcessor(stepper, settings, machine);
 auto home = HomeSensor(&stepper, &settings.home, HOME_INDEX_PIN, commandProcessor);
 Timer periodicTasks;
 Timer serialInactivityTimer;
-//auto rain = RainSensor(RAIN_SENSOR_PIN);
+// auto rain = RainSensor(RAIN_SENSOR_PIN);
 
 // cin and cout for ArduinoSTL
 std::ohserialstream cout(Serial);
@@ -50,7 +53,7 @@ std::ihserialstream cin(Serial);
 
 void DispatchCommand(const Command &command)
 {
-	//std::cout << command.RawCommand << "V=" << command.Verb << ", T=" << command.TargetDevice << ", P=" << command.StepPosition << std::endl;
+	// std::cout << command.RawCommand << "V=" << command.Verb << ", T=" << command.TargetDevice << ", P=" << command.StepPosition << std::endl;
 	commandProcessor.HandleCommand(command);
 }
 
@@ -61,55 +64,55 @@ void DispatchCommand(const Command &command)
  */
 void HandleSerialCommunications()
 {
-	if (!host || host.available() <= 0)
-		return; // No data available.
-	const auto rx = host.read();
-	if (rx < 0)
-		return; // No data available.
-
-	serialInactivityTimer.SetDuration(SerialInactivityTimeout);
-	const char rxChar = char(rx);
-	switch (rxChar)
+	while (Serial.available() > 0)
 	{
-	case '\n': // newline - dispatch the command
-	case '\r': // carriage return - dispatch the command
-		if (hostReceiveBuffer.length() > 1)
+		const auto rx = Serial.read();
+		if (rx < 0)
+			return; // No data available.
+
+		serialInactivityTimer.SetDuration(SerialInactivityTimeout);
+		const char rxChar = char(rx);
+		switch (rxChar)
 		{
-			const auto command = Command(hostReceiveBuffer);
-			DispatchCommand(command);
+		case '\n': // newline - dispatch the command
+		case '\r': // carriage return - dispatch the command
+			if (hostReceiveBuffer.length() > 1)
+			{
+				const auto command = Command(hostReceiveBuffer);
+				DispatchCommand(command);
+				hostReceiveBuffer.clear();
+				if (ResponseBuilder::available())
+					std::cout
+						<< ResponseBuilder::header
+						<< ResponseBuilder::Message
+						<< ResponseBuilder::terminator
+						<< std::endl; // send response, if there is one.
+			}
+			break;
+		case '@': // Start of new command
 			hostReceiveBuffer.clear();
-			if (ResponseBuilder::available())
-				std::cout
-					<< ResponseBuilder::header
-					<< ResponseBuilder::Message
-					<< ResponseBuilder::terminator
-					<< std::endl; // send response, if there is one.
+		default:
+			if (hostReceiveBuffer.length() < HOST_SERIAL_RX_BUFFER_SIZE)
+			{
+				hostReceiveBuffer.push_back(rxChar);
+			}
+			break;
 		}
-		break;
-	case '@': // Start of new command
-		hostReceiveBuffer.clear();
-	default:
-		if (hostReceiveBuffer.length() < HOST_SERIAL_RX_BUFFER_SIZE)
-		{
-			hostReceiveBuffer.push_back(rxChar);
-		}
-		break;
 	}
 }
 
 // the setup function runs once when you press reset or power the board
 void setup()
 {
-    
 	stepper.releaseMotor();
 	stepper.registerStopHandler(onMotorStopped);
 	pinMode(CLOCKWISE_BUTTON_PIN, INPUT_PULLUP);
 	pinMode(COUNTERCLOCKWISE_BUTTON_PIN, INPUT_PULLUP);
 	hostReceiveBuffer.reserve(HOST_SERIAL_RX_BUFFER_SIZE);
 	xbeeApiRxBuffer.reserve(API_MAX_FRAME_LENGTH);
-	host.begin(115200);
+	Serial.begin(115200);
 	// Connect cin and cout to our SafeSerial instance
-	ArduinoSTL_Serial.connect(host);
+	ArduinoSTL_Serial.connect(Serial);
 	xbeeSerial.begin(9600);
 	delay(1000); // Let the USB/serial stack warm up a bit longer.
 	xbeeApi.reset();
@@ -170,15 +173,15 @@ void loop()
 	{
 		periodicTasks.SetDuration(250);
 		heartbeat();
-        
+
 		if (stepper.isMoving())
 			std::cout << "P" << std::dec << commandProcessor.getPositionInWholeSteps() << std::endl;
-        ProcessManualControls();
+		ProcessManualControls();
 		// rain.loop();
 		// Release stepper holding torque if there has been no serial communication for "a long time".
 		if (serialInactivityTimer.Expired())
 		{
-			//stepper.releaseMotor();
+			// stepper.releaseMotor();
 			serialInactivityTimer.Stop();
 		}
 	}
@@ -190,12 +193,11 @@ void onXbeeFrameReceived(FrameType type, std::vector<byte> &payload)
 	machine.onXbeeFrameReceived(type, payload);
 }
 
-
 // Handle the motor stop event from the stepper driver.
 void onMotorStopped()
 {
-	//std::cout << "STOP" << std::endl;
-	// First, "normalize" the step position
+	// std::cout << "STOP" << std::endl;
+	//  First, "normalize" the step position
 	settings.motor.currentPosition = commandProcessor.getNormalizedPositionInMicrosteps();
 	home.onMotorStopped();
 	commandProcessor.sendStatus();

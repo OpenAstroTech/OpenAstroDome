@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Arduino.h>
-#include "../Configuration/NexDome.h"
+#include "NexDome.h"
 
 class BTS7960
 {
