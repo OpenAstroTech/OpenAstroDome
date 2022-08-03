@@ -4,7 +4,7 @@
 
 #include <ArduinoSTL.h>
 #include "LimitSwitch.h"
-#include "NexDome.h"
+#include "OpenAstroDome.h"
 
 
 MicrosteppingMotor* LimitSwitch::motor;

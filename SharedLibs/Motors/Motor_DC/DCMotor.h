@@ -8,7 +8,7 @@
 #else
 #include "WProgram.h"
 #endif
-#include "NexDome.h"
+#include "OpenAstroDome.h"
 #include "Encoder.h"
 #include "Motor.h"
 

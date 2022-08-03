@@ -3,7 +3,7 @@
 //
 
 #include <EEPROM.h>
-#include "NexDome.h"
+#include "OpenAstroDome.h"
 #include "PersistentSettings.h"
 
 PersistentSettings::PersistentSettings() :

@@ -12,7 +12,7 @@
 #include <XBeeApi.h>
 #include <Timer.h>
 // #include "RainSensor.h"
-#include "NexDome.h"
+#include "OpenAstroDome.h"
 #include "PersistentSettings.h"
 #include "HomeSensor.h"
 #include "CommandProcessor.h"

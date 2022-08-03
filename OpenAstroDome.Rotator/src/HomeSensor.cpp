@@ -9,7 +9,7 @@
  * Note: some fields have to be static because they are used during interrupts
  */
 
-#include "NexDome.h"
+#include "OpenAstroDome.h"
 #include "HomeSensor.h"
 
 #pragma region static fields used within interrupt service routines

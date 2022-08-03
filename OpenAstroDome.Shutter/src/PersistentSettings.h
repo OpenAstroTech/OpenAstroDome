@@ -9,7 +9,7 @@
 #include "WProgram.h"
 #endif
 
-#include "NexDome.h"
+#include "OpenAstroDome.h"
 #include "AdvancedStepper.h"
 #include "Version.h"
 #include "BatteryMonitor.h"

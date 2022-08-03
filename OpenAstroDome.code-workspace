@@ -4,10 +4,10 @@
 			"path": "SharedLibs"
 		},
 		{
-			"path": "TA.NexDome.Rotator"
+			"path": "OpenAstroDome.Rotator"
 		},
 		{
-			"path": "TA.NexDome.Shutter"
+			"path": "OpenAstroDome.Shutter"
 		}
 	],
 	"settings": {
@@ -23,7 +23,8 @@
 			"xutility": "cpp",
 			"associative_base": "cpp",
 			"iterator": "cpp",
-			"serstream": "cpp"
+			"serstream": "cpp",
+			"sstream": "cpp"
 		}
 	}
 }

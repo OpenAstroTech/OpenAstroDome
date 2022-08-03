@@ -5,7 +5,7 @@
 // #include <SafeSerial.h>
 #include <AdvancedStepper.h>
 #include <XBeeApi.h>
-#include "NexDome.h"
+#include "OpenAstroDome.h"
 #include "XBeeStatemachine.h"
 #include "XBeeStartupState.h"
 #include "XBeeWaitForCommandModeState.h"

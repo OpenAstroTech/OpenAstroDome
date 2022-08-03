@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Arduino.h>
-#include "NexDome.h"
+#include "OpenAstroDome.h"
 
 class SHIELDMD10
 {

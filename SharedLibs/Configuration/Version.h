@@ -4,7 +4,7 @@
  * See boards.txt in the source directory.
  */
 
-#define SemanticVersion "4.0.1"
-#define MajorVersion (4)
+#define SemanticVersion "1.0.0"
+#define MajorVersion (1)
 #define MinorVersion (0)
 

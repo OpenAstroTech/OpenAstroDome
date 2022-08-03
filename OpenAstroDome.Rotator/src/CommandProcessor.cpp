@@ -1,6 +1,6 @@
 #include "PersistentSettings.h"
 #include "CommandProcessor.h"
-#include "NexDome.h"
+#include "OpenAstroDome.h"
 #include "Version.h"
 #include <sstream>
 

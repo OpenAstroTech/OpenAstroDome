@@ -2,7 +2,7 @@
 #include <stdint.h>
 
 #include "CommandProcessor.h"
-#include "NexDome.h"
+#include "OpenAstroDome.h"
 #include "Version.h"
 
 CommandProcessor::CommandProcessor(MicrosteppingMotor &motor, PersistentSettings &settings, XBeeStateMachine& machine, LimitSwitch &limits, BatteryMonitor &monitor)
