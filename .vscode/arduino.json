@@ -1,5 +1,0 @@
-{
-    "board": "arduino:avr:leonardo",
-    "port": "COM10",
-    "sketch": "TA.NexDome.Shutter\\TA.NexDome.Shutter.ino"
-}
