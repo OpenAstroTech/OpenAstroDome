@@ -1,7 +1,7 @@
 
 #include "XBeeStartupState.h"
 #include "XBeeWaitForCommandModeState.h"
-#include "NexDome.h"
+#include "OpenAstroDome.h"
 
 void XBeeStartupState::OnEnter()
 {
