@@ -17,7 +17,7 @@
  * happen to be powered on simultaneously, then the rotator has time to be configured and ready
  * when the shutter XBee tries to associate with the coordinator.
 */
-constexpr Duration XbeeBootTime = Timer::Seconds(6);
+constexpr Duration XbeeBootTime = Timer::Seconds(1);
 
 class XBeeStartupState : public IXBeeState
 {

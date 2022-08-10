@@ -30,7 +30,7 @@ auto stepper = DCMotor(MOTOR_STEP_PIN, MOTOR_ENABLE_PIN, MOTOR_DIRECTION_PIN, se
 #endif
 auto limitSwitches = LimitSwitch(&stepper, OPEN_LIMIT_SWITCH_PIN, CLOSED_LIMIT_SWITCH_PIN);
 // auto &xbeeSerial = Serial1; // Original
-auto xbeeSerial = SoftwareSerial(6, 7); // UNO
+SoftwareSerial xbeeSerial(5, 6); // UNO
 // HardwareSerial host(Serial);
 std::string hostReceiveBuffer;
 std::vector<byte> xbeeApiRxBuffer;
@@ -135,7 +135,7 @@ void setup()
 
 	periodicTasks.SetDuration(1000);
 	interrupts();
-	machine.ChangeState(new XBeeStartupState(machine));
+	// machine.ChangeState(new XBeeStartupState(machine));
 	machine.ChangeState(new XBeeOnlineState(machine));
 	limitSwitches.init(); // attaches interrupt vectors
 #if !DEBUG_CONSERVE_FLASH
@@ -148,7 +148,7 @@ void loop()
 {
 	static std::ostringstream converter;
 	stepper.loop();
-	HandleSerialCommunications();
+	// HandleSerialCommunications();
 	machine.Loop();
 #if !DEBUG_CONSERVE_FLASH
 	batteryMonitor.loop();

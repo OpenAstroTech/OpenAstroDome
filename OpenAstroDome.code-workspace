@@ -24,7 +24,8 @@
 			"associative_base": "cpp",
 			"iterator": "cpp",
 			"serstream": "cpp",
-			"sstream": "cpp"
+			"sstream": "cpp",
+			"istream": "cpp"
 		}
 	}
 }

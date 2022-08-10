@@ -10,7 +10,7 @@ void XBeeWaitForCommandModeState::OnTimerExpired()
 void XBeeWaitForCommandModeState::OnEnter()
 	{
 	machine.ListenInAtCommandMode();
-	machine.sendToLocalXbee(XBEE_ATTENTION);
+	//machine.sendToLocalXbee(XBEE_ATTENTION);
 	timer.SetDuration(XBEE_AT_GUARD_TIME);
 	}
 

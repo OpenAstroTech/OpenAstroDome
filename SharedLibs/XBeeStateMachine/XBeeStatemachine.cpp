@@ -53,6 +53,7 @@ void XBeeStateMachine::SendToRemoteXbee(const std::string &message)
 	Checksum	0 (doesn't count towards frame length)
 	Total = 11 + message.length()
 	*/
+	/*
 	const uint16_t length = 11 + message.length();
 	xbeeSerial.print(char(API_FRAME_START));
 	printEscaped(byte(length >> 8)); // Length MSB
@@ -69,15 +70,17 @@ void XBeeStateMachine::SendToRemoteXbee(const std::string &message)
 		checksum += addressByte;
 	}
 	printEscaped(byte(0)); // No options
+	*/
 	// Now comes the data, up to 100 bytes
 	for (auto data = message.begin(); data < message.end(); ++data)
 	{
 		const byte dataByte = *data;
 		printEscaped(dataByte);
-		checksum += dataByte;
+		// checksum += dataByte;
 	}
 	// And finally, the checksum.
-	printEscaped(char(byte(0xFF) - checksum));
+	// printEscaped(char(byte(0xFF) - checksum));
+	xbeeSerial.print('\r');
 }
 
 // Send a data byte to the local XBee, inserting an escape sequence if needed.
@@ -191,6 +194,25 @@ void XBeeStateMachine::xbee_serial_receive() const
 	static std::string rxBuffer;
 	if (xbeeSerial.available() <= 0)
 		return; // No data available
+
+	const auto rx = xbeeSerial.read();
+	if (rx < 0)
+		return; // Nothing read.
+
+	char ch = char(rx);
+	if (ch == '\r')
+	{
+		currentState->OnSerialLineReceived(rxBuffer);
+		//Serial.print(">>>> ");
+		//Serial.println(rxBuffer.c_str());
+		rxBuffer.clear();
+	}
+	else
+		rxBuffer.push_back(ch);
+	/*
+	static std::string rxBuffer;
+	if (xbeeSerial.available() <= 0)
+		return; // No data available
 	const auto rx = xbeeSerial.read();
 	if (rx < 0)
 		return; // Nothing read.
@@ -205,6 +227,7 @@ void XBeeStateMachine::xbee_serial_receive() const
 	}
 	else
 		rxBuffer.push_back(ch);
+	*/
 }
 
 inline void XBeeStateMachine::xbee_api_receive() const
