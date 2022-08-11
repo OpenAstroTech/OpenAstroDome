@@ -55,8 +55,7 @@ const float DCMOTOR_kd_R = 0.02;
 #define ROTATOR_FULL_REVOLUTION_MICROSTEPS (30000)
 #define ROTATOR_MAX_POSITION (MaxStepPosition)
 #define ROTATOR_HOME_POSITION (0)
-//#define ROTATOR_DEFAULT_DEADZONE (75 * MICROSTEPS_PER_STEP)	// default dead-zone in microsteps (~0.5°)
-#define ROTATOR_DEFAULT_DEADZONE (50)	// default dead-zone in microsteps (~0.5°)
+#define ROTATOR_DEFAULT_DEADZONE (ROTATOR_FULL_REVOLUTION_MICROSTEPS / 360 * 0.5)	// default dead-zone in microsteps (~0.5°)
 
 #define HOST_SERIAL_RX_BUFFER_SIZE (16) // Receive buffer for PC/USB communications
 
