@@ -34,8 +34,8 @@ auto stepper = MicrosteppingMotor(MOTOR_STEP_PIN, MOTOR_ENABLE_PIN, MOTOR_DIRECT
 #elif ROTATOR_MOTOR_TYPE == DC_MOTOR
 auto stepper = DCMotor(MOTOR_STEP_PIN, MOTOR_ENABLE_PIN, MOTOR_DIRECTION_PIN, settings.motor);
 #endif
-// auto &xbeeSerial = Serial1;
-auto xbeeSerial = SoftwareSerial(28, 30);
+auto &xbeeSerial = Serial1;
+// auto xbeeSerial = SoftwareSerial(28, 30);
 // HardwareSerial host(Serial);
 std::string hostReceiveBuffer;
 std::vector<byte> xbeeApiRxBuffer;

@@ -29,8 +29,8 @@ auto stepper = MicrosteppingMotor(MOTOR_STEP_PIN, MOTOR_ENABLE_PIN, MOTOR_DIRECT
 auto stepper = DCMotor(MOTOR_STEP_PIN, MOTOR_ENABLE_PIN, MOTOR_DIRECTION_PIN, settings.motor);
 #endif
 auto limitSwitches = LimitSwitch(&stepper, OPEN_LIMIT_SWITCH_PIN, CLOSED_LIMIT_SWITCH_PIN);
-// auto &xbeeSerial = Serial1; // Original
-auto xbeeSerial = SoftwareSerial(6, 7); // UNO
+auto &xbeeSerial = Serial1; // Original
+// auto xbeeSerial = SoftwareSerial(5, 6); // UNO
 // HardwareSerial host(Serial);
 std::string hostReceiveBuffer;
 std::vector<byte> xbeeApiRxBuffer;
