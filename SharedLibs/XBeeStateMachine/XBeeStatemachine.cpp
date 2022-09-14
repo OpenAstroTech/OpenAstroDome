@@ -3,7 +3,7 @@
 
 Timer IXBeeState::timer = Timer();
 
-XBeeStateMachine::XBeeStateMachine(HardwareSerial& xBeePort, XBeeApi& xbee)
+XBeeStateMachine::XBeeStateMachine(HardwareSerial &xBeePort, XBeeApi &xbee)
 	: xbeeSerial(xBeePort), xbeeApi(xbee)
 {
 	remoteAddress.reserve(8); // 8 bytes for a 64-bit address
