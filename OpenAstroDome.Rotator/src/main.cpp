@@ -34,9 +34,9 @@ auto stepper = MicrosteppingMotor(MOTOR_STEP_PIN, MOTOR_ENABLE_PIN, MOTOR_DIRECT
 #elif ROTATOR_MOTOR_TYPE == DC_MOTOR
 auto stepper = DCMotor(MOTOR_STEP_PIN, MOTOR_ENABLE_PIN, MOTOR_DIRECTION_PIN, settings.motor);
 #endif
-// auto &xbeeSerial = Serial1;
-auto xbeeSerial = SoftwareSerial(28, 30);
-// HardwareSerial host(Serial);
+auto &xbeeSerial = Serial1;
+//auto xbeeSerial = SoftwareSerial(2, 3);
+HardwareSerial host(Serial);
 std::string hostReceiveBuffer;
 std::vector<byte> xbeeApiRxBuffer;
 auto xbeeApi = XBeeApi(xbeeSerial, xbeeApiRxBuffer, ReceiveHandler(onXbeeFrameReceived));
@@ -110,7 +110,7 @@ void setup()
 	pinMode(COUNTERCLOCKWISE_BUTTON_PIN, INPUT_PULLUP);
 	hostReceiveBuffer.reserve(HOST_SERIAL_RX_BUFFER_SIZE);
 	xbeeApiRxBuffer.reserve(API_MAX_FRAME_LENGTH);
-	Serial.begin(115200);
+	host.begin(115200);
 	// Connect cin and cout to our SafeSerial instance
 	ArduinoSTL_Serial.connect(Serial);
 	xbeeSerial.begin(9600);

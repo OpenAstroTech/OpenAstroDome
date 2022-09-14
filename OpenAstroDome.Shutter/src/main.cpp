@@ -29,15 +29,15 @@ auto stepper = MicrosteppingMotor(MOTOR_STEP_PIN, MOTOR_ENABLE_PIN, MOTOR_DIRECT
 auto stepper = DCMotor(MOTOR_STEP_PIN, MOTOR_ENABLE_PIN, MOTOR_DIRECTION_PIN, settings.motor);
 #endif
 auto limitSwitches = LimitSwitch(&stepper, OPEN_LIMIT_SWITCH_PIN, CLOSED_LIMIT_SWITCH_PIN);
-// auto &xbeeSerial = Serial1; // Original
-auto xbeeSerial = SoftwareSerial(6, 7); // UNO
-// HardwareSerial host(Serial);
+auto &xbeeSerial = Serial1;
+// auto xbeeSerial = SoftwareSerial(0, 1); // UNO
+HardwareSerial host(Serial);
 std::string hostReceiveBuffer;
 std::vector<byte> xbeeApiRxBuffer;
 void HandleFrameReceived(FrameType type, const std::vector<byte> &payload); // forward reference
 auto xbee = XBeeApi(xbeeSerial, xbeeApiRxBuffer, ReceiveHandler(HandleFrameReceived));
 auto machine = XBeeStateMachine(xbeeSerial, xbee);
-auto batteryMonitor = BatteryMonitor(machine, A0, settings.batteryMonitor);
+auto batteryMonitor = BatteryMonitor(machine, BATTERY_SENSOR_PIN, settings.batteryMonitor);
 auto commandProcessor = CommandProcessor(stepper, settings, machine, limitSwitches, batteryMonitor);
 
 // cin and cout for ArduinoSTL
@@ -127,7 +127,7 @@ void setup()
 	pinMode(COUNTERCLOCKWISE_BUTTON_PIN, INPUT_PULLUP);
 	hostReceiveBuffer.reserve(HOST_SERIAL_RX_BUFFER_SIZE);
 	xbeeApiRxBuffer.reserve(API_MAX_FRAME_LENGTH);
-	Serial.begin(115200);
+	host.begin(115200);
 
 	// Connect cin and cout to our SafeSerial instance
 	ArduinoSTL_Serial.connect(Serial);
