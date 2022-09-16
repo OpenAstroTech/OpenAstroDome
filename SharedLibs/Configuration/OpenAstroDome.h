@@ -58,6 +58,8 @@ const float DCMOTOR_kd_R = 0.02;
 #define ROTATOR_DEFAULT_DEADZONE_DEG (0.5)
 #define ROTATOR_DEFAULT_DEADZONE (ROTATOR_FULL_REVOLUTION_MICROSTEPS / 360 * ROTATOR_DEFAULT_DEADZONE_DEG)	// default dead-zone in microsteps (~0.5°)
 
+// Serial Configuration
+#define XBEE_SERIAL Serial3 // Serial port to connect Xbee
 #define HOST_SERIAL_RX_BUFFER_SIZE (16) // Receive buffer for PC/USB communications
 
 // Other hardware assignments
