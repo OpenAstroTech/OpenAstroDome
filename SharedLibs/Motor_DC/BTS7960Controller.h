@@ -6,10 +6,8 @@
 class BTS7960
 {
   public:
-    BTS7960(uint8_t EN, uint8_t L_PWM, uint8_t R_PWM) : BTS7960(EN, 0, L_PWM, R_PWM)
-    {
-    }
-    BTS7960(uint8_t L_EN, uint8_t R_EN, uint8_t L_PWM, uint8_t R_PWM);
+    //BTS7960(uint8_t EN, uint8_t L_PWM, uint8_t R_PWM) : BTS7960(EN, 0, L_PWM, R_PWM);
+    BTS7960();
     void Enable();
     void Disable();
     void run(int dir, int pwm);
@@ -19,9 +17,5 @@ class BTS7960
     int readCurrent();
 
   private:
-    uint8_t _L_EN;
-    uint8_t _R_EN;
-    uint8_t _L_PWM;
-    uint8_t _R_PWM;
     bool _isRunning;
 };

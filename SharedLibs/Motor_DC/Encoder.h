@@ -6,7 +6,8 @@ class Encoder
 {
   public:
     Encoder(volatile int32_t &currentPosition, uint8_t ENCA, uint8_t ENCB);
-    static void updateEncoder();
+    static void updateEncoderA();
+    static void updateEncoderB();
   
   private:
     inline static uint8_t _ENCA;

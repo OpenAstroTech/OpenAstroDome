@@ -72,6 +72,13 @@ void CommandProcessor::sendStatus() const
 		   << getDeadZoneWholeSteps()
 		   << ResponseBuilder::terminator;
 	std::cout << status.str() << std::endl;
+
+	Serial3.println("sendStatus called");
+	Serial3.print("getCircumferenceInWholeSteps: ");
+	Serial3.println(getCircumferenceInWholeSteps());
+	Serial3.print("getPositionInWholeSteps:");
+	Serial3.println(getPositionInWholeSteps());
+	Serial3.println("----END-----");
 }
 
 void CommandProcessor::sendDirection(const int direction)
@@ -96,6 +103,10 @@ void CommandProcessor::ForwardToShutter(const Command &command) const
 
 void CommandProcessor::HandleCommand(const Command &command) const
 {
+	Serial3.println("Command in:");
+	Serial3.println(command.RawCommand.c_str());
+	Serial3.println("------END------");
+
 	ResponseBuilder::FromSuccessfulCommand(command); // This is the default response unless overwritten below
 	if (command.IsShutterCommand())
 	{
@@ -230,6 +241,11 @@ void CommandProcessor::HandleZD(const Command &command) const
 void CommandProcessor::HandlePR(const Command &command) const
 {
 	const auto position = microstepsToSteps(rotator.getCurrentPosition());
+
+	Serial3.println("Position: ");
+	Serial3.println(position);
+	// Serial3.println("----END-----");
+
 	ResponseBuilder::FromInteger(command, position);
 }
 
@@ -241,6 +257,10 @@ void CommandProcessor::HandlePW(const Command &command) const
 
 void CommandProcessor::HandleRW(const Command &command) const
 {
+	Serial3.println("HandleRW called");
+	Serial3.println(command.StepPosition);
+	Serial3.println("----END-----");
+
 	const auto microsteps = stepsToMicrosteps(command.StepPosition);
 	settings.home.microstepsPerRotation = microsteps;
 }
@@ -264,6 +284,10 @@ void CommandProcessor::HandleVR(const Command &command) const
 
 void CommandProcessor::HandleVW(const Command &command) const
 {
+	Serial3.println("HandleVW called");
+	Serial3.println(command.StepPosition);
+	Serial3.println("----END-----");
+
 	uint16_t speed = stepsToMicrosteps(command.StepPosition);
 	if (speed < rotator.getMinimumSpeed())
 		ResponseBuilder::Error();
@@ -296,12 +320,12 @@ int32_t CommandProcessor::deltaSteps(const uint32_t toMicrostepPosition) const
 	return delta;
 }
 
-inline int32_t CommandProcessor::microstepsToSteps(int32_t microsteps)
+int32_t CommandProcessor::microstepsToSteps(int32_t microsteps)
 {
 	return microsteps / MICROSTEPS_PER_STEP;
 }
 
-inline int32_t CommandProcessor::stepsToMicrosteps(int32_t wholeSteps)
+int32_t CommandProcessor::stepsToMicrosteps(int32_t wholeSteps)
 {
 	return wholeSteps * MICROSTEPS_PER_STEP;
 }
@@ -316,7 +340,7 @@ uint32_t CommandProcessor::getNormalizedPositionInMicrosteps() const
 	return position;
 }
 
-inline int32_t CommandProcessor::getPositionInWholeSteps() const
+int32_t CommandProcessor::getPositionInWholeSteps() const
 {
 	return microstepsToSteps(getNormalizedPositionInMicrosteps());
 }
@@ -329,11 +353,17 @@ int32_t CommandProcessor::getCircumferenceInWholeSteps() const
 int32_t CommandProcessor::getHomePositionWholeSteps() const
 {
 	return microstepsToSteps(settings.home.position);
+	//return settings.home.position;
 }
 
 float CommandProcessor::getAzimuth() const
 {
 	const auto degreesPerStep = 360.0 / settings.home.microstepsPerRotation;
+
+	Serial3.println("getAzimuth called");
+	Serial3.println(getPositionInWholeSteps() * degreesPerStep);
+	Serial3.println("----END-----");
+
 	return getPositionInWholeSteps() * degreesPerStep;
 }
 

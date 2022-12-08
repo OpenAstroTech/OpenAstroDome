@@ -15,22 +15,23 @@
 #include "PersistentSettings.h"
 #include "LimitSwitch.h"
 #include "BatteryMonitor.h"
-// UNO SoftwareSerial
-#include "SoftwareSerial.h"
 
-void onMotorStopped(); // Forward reference
+void onMotorLeftStopped(); // Forward reference
+void onMotorRightStopped(); // Forward reference
 
 Timer periodicTasks;
 auto stepGenerator = CounterTimer1StepGenerator();
 auto settings = PersistentSettings::Load();
 #if SHUTTER_MOTOR_TYPE == STEPPER_MOTOR
-auto stepper = MicrosteppingMotor(MOTOR_STEP_PIN, MOTOR_ENABLE_PIN, MOTOR_DIRECTION_PIN, stepGenerator, settings.motor);
+	auto stepperLeft = MicrosteppingMotor(LEFT_MOTOR_STEP_PIN, MOTOR_ENABLE_PIN, LEFT_MOTOR_DIRECTION_PIN, stepGenerator, settings.motor);
+	auto stepperRight = MicrosteppingMotor(RIGHT_MOTOR_STEP_PIN, MOTOR_ENABLE_PIN, RIGHT_MOTOR_DIRECTION_PIN, stepGenerator, settings.motor);
 #elif SHUTTER_MOTOR_TYPE == DC_MOTOR
-auto stepper = DCMotor(MOTOR_STEP_PIN, MOTOR_ENABLE_PIN, MOTOR_DIRECTION_PIN, settings.motor);
+	auto stepper = DCMotor(MOTOR_STEP_PIN, MOTOR_ENABLE_PIN, MOTOR_DIRECTION_PIN, settings.motor);
 #endif
-auto limitSwitches = LimitSwitch(&stepper, OPEN_LIMIT_SWITCH_PIN, CLOSED_LIMIT_SWITCH_PIN);
-auto &xbeeSerial = Serial1; // Original
-// auto xbeeSerial = SoftwareSerial(5, 6); // UNO
+auto limitSwitchesLeft = LimitSwitch(&stepperLeft, LEFT_LIMIT_SWITCH_PIN);
+auto limitSwitchesRight = LimitSwitch(&stepperRight, RIGHT_LIMIT_SWITCH_PIN);
+
+auto &xbeeSerial = XBEE_SERIAL;
 HardwareSerial host(Serial);
 std::string hostReceiveBuffer;
 std::vector<byte> xbeeApiRxBuffer;
@@ -38,7 +39,7 @@ void HandleFrameReceived(FrameType type, const std::vector<byte> &payload); // f
 auto xbee = XBeeApi(xbeeSerial, xbeeApiRxBuffer, ReceiveHandler(HandleFrameReceived));
 auto machine = XBeeStateMachine(xbeeSerial, xbee);
 auto batteryMonitor = BatteryMonitor(machine, BATTERY_SENSOR_PIN, settings.batteryMonitor);
-auto commandProcessor = CommandProcessor(stepper, settings, machine, limitSwitches, batteryMonitor);
+auto commandProcessor = CommandProcessor(stepperLeft, stepperRight, settings, machine, limitSwitchesLeft, limitSwitchesRight, batteryMonitor);
 
 // cin and cout for ArduinoSTL
 
@@ -55,27 +56,35 @@ void ProcessManualControls()
 	static bool openButtonLastState = false;
 	static bool closeButtonLastState = false;
 	const bool openButtonPressed = digitalRead(OPEN_BUTTON_PIN) == 0;
+	//std::cout << openButtonPressed;
 	const bool openButtonChanged = openButtonPressed != openButtonLastState;
 	if (openButtonChanged && openButtonPressed)
 	{
+		// std::cout << "OPEN";
 		commandProcessor.sendOpenNotification();
-		stepper.moveToPosition(MaxStepPosition);
+		stepperLeft.moveToPosition(MaxStepPosition);
+		stepperRight.moveToPosition(MaxStepPosition);
 	}
 	if (openButtonChanged && !openButtonPressed)
 	{
-		stepper.SoftStop();
+		stepperLeft.SoftStop();
+		stepperRight.SoftStop();
 	}
 	openButtonLastState = openButtonPressed;
 	const bool closedButtonPressed = digitalRead(CLOSE_BUTTON_PIN) == 0;
+	//std::cout << closedButtonPressed;
 	const bool closedButtonChanged = closedButtonPressed != closeButtonLastState;
 	if (closedButtonChanged && closedButtonPressed)
 	{
+		// std::cout << "CLOSE";
 		commandProcessor.sendCloseNotification();
-		stepper.moveToPosition(MinStepPosition);
+		stepperLeft.moveToPosition(MinStepPosition);
+		stepperRight.moveToPosition(MinStepPosition);
 	}
 	if (closedButtonChanged && !closedButtonPressed)
 	{
-		stepper.SoftStop();
+		stepperLeft.SoftStop();
+		stepperRight.SoftStop();
 	}
 	closeButtonLastState = closedButtonPressed;
 }
@@ -121,12 +130,17 @@ void HandleSerialCommunications()
 // the setup function runs once when you press reset or power the board
 void setup()
 {
-	stepper.releaseMotor();
-	stepper.registerStopHandler(onMotorStopped);
+	stepperLeft.releaseMotor();
+	stepperRight.releaseMotor();
+	stepperLeft.registerStopHandler(onMotorLeftStopped);
+	stepperRight.registerStopHandler(onMotorRightStopped);
+
 	pinMode(CLOCKWISE_BUTTON_PIN, INPUT_PULLUP);
 	pinMode(COUNTERCLOCKWISE_BUTTON_PIN, INPUT_PULLUP);
+
 	hostReceiveBuffer.reserve(HOST_SERIAL_RX_BUFFER_SIZE);
 	xbeeApiRxBuffer.reserve(API_MAX_FRAME_LENGTH);
+
 	host.begin(115200);
 
 	// Connect cin and cout to our SafeSerial instance
@@ -137,7 +151,8 @@ void setup()
 	interrupts();
 	machine.ChangeState(new XBeeStartupState(machine));
 	machine.ChangeState(new XBeeOnlineState(machine));
-	limitSwitches.init(); // attaches interrupt vectors
+	limitSwitchesLeft.init(); // attaches interrupt vectors
+	limitSwitchesRight.init(); // attaches interrupt vectors
 #if !DEBUG_CONSERVE_FLASH
 	batteryMonitor.initialize(10000);
 #endif
@@ -147,9 +162,11 @@ void setup()
 void loop()
 {
 	static std::ostringstream converter;
-	stepper.loop();
+	stepperLeft.loop();
+	stepperRight.loop();
 	HandleSerialCommunications();
 	machine.Loop();
+
 #if !DEBUG_CONSERVE_FLASH
 	batteryMonitor.loop();
 #endif
@@ -157,7 +174,7 @@ void loop()
 	{
 		periodicTasks.SetDuration(250);
 		ProcessManualControls();
-		if (stepper.isMoving())
+		if (stepperLeft.isMoving())
 		{
 			const auto wholeSteps = commandProcessor.getPositionInWholeSteps();
 			converter.clear();
@@ -172,8 +189,15 @@ void loop()
 }
 
 // Handle the motor stop event from the stepper driver.
-void onMotorStopped()
+void onMotorLeftStopped()
 {
-	limitSwitches.onMotorStopped();
+	limitSwitchesLeft.onMotorStopped();
 	commandProcessor.sendStatus();
 }
+
+void onMotorRightStopped()
+{
+	limitSwitchesRight.onMotorStopped();
+	commandProcessor.sendStatus();
+}
+

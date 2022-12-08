@@ -13,19 +13,24 @@
 
 class LimitSwitch
 	{
+	enum ShutterState
+	{
+		OPENING,
+		CLOSING
+	};
+	
 	public:
-		LimitSwitch(Motor* stepper, uint8_t openLimit, uint8_t closeLimit);
+		LimitSwitch(Motor* stepper, uint8_t limit);
 		bool isOpen() const;
 		bool isClosed() const;
 		void init() const;
 		void onMotorStopped();
 
 	private:
-		uint8_t openLimitPin;
-		uint8_t closedLimitPin;
+		uint8_t limitPin;
 		static volatile bool closeTriggered;
 		static Motor* motor;
-		static void onOpenLimitReached();
+		static void onLimitReached();
 		static void onCloseLimitReached();
 	};
 

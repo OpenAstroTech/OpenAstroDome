@@ -36,7 +36,7 @@ struct PWMSettings
 class DCMotor : public Motor
 	{
 	public:
-		DCMotor(uint8_t stepPin, uint8_t enablePin, uint8_t directionPin, MotorSettings& settings);
+		DCMotor(MotorSettings& settings);
 		virtual void Step(bool state) final;
 		//void MoveAtVelocity(float stepsPerSecond);
 		void energizeMotor() const;
@@ -65,7 +65,7 @@ class DCMotor : public Motor
 
 	private:
 		#if MOTOR_BOARD == MOTOR_CONTROLLER_BTS7960
-			BTS7960::Motor* _rotator;
+			BTS7960* _rotator;
 		#elif MOTOR_BOARD == MOTOR_CONTROLLER_SHIELDMD10
 			SHIELDMD10* _rotator;
 		#endif

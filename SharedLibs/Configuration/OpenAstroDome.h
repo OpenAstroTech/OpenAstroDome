@@ -13,17 +13,18 @@ constexpr int32_t MaxStepPosition = 2000000000L;
 constexpr int32_t MinStepPosition = -2000000000L;
 
 #define ROTATOR_MOTOR_TYPE  (DC_MOTOR) // See Constants.h for options
-#define SHUTTER_MOTOR_TYPE  (DC_MOTOR) // See Constants.h for options
+#define SHUTTER_MOTOR_TYPE  (STEPPER_MOTOR) // See Constants.h for options
 // Motor Parameters
-#define MICROSTEPS_PER_STEP (8) // Should match DIP switches on stepper driver
+#define MICROSTEPS_PER_STEP (1) // Should match DIP switches on stepper driver
 #define MIN_SPEED (250)         // Minimum speed that can be timed by the hardware timer
 #define MIN_RAMP_TIME (100)     // Minimum ramp up/down time in milliseconds
 
 // DC Motor defaults
-#define MOTOR_BOARD     (MOTOR_CONTROLLER_SHIELDMD10)
+#define MOTOR_BOARD     (MOTOR_CONTROLLER_BTS7960)
 #define ENCODER_PIN_A    (2)   // Encoder
 #define ENCODER_PIN_B    (3)   // Encoder
-#define MOTOR_MIN_PWM   (60)    // Minimum PWM setting needed to move the motor
+#define MOTOR_MIN_PWM   (90)   // Minimum PWM setting needed to move the motor
+#define MOTOR_MAX_PWM   (128)  // Minimum PWM setting needed to move the motor
 // Acceleration PID constants
 const float DCMOTOR_kp_A = 0.00;
 const float DCMOTOR_ki_A = 0.2;
@@ -39,12 +40,16 @@ const float DCMOTOR_kd_R = 0.02;
 #define MOTOR_PWM_PIN_R (10)
 // SHEILDMD10
 #define MOTOR_DIRECTION_PIN (8)
+#define LEFT_MOTOR_DIRECTION_PIN (8)
+#define RIGHT_MOTOR_DIRECTION_PIN (11)
 #define MOTOR_PWM_PIN (9)
 
 // Stepper Motor defaults
-#define MOTOR_STEP_PIN (7) //12
+#define LEFT_MOTOR_STEP_PIN (7) //12
+#define RIGHT_MOTOR_STEP_PIN (10) //12
 //#define MOTOR_DIRECTION_PIN (8) //11
 #define MOTOR_ENABLE_PIN (9) //10
+
 #define MOTOR_RAMP_TIME (1500) // milliseconds to accelerate to full speed
 #define MOTOR_MAX_SPEED (25000 * MICROSTEPS_PER_STEP)
 #define ROTATOR_DEFAULT_SPEED (600 * MICROSTEPS_PER_STEP)
@@ -52,20 +57,27 @@ const float DCMOTOR_kd_R = 0.02;
 #define SHUTTER_FULL_OPEN_DEFAULT (46000UL * MICROSTEPS_PER_STEP)
 #define SHUTTER_LIMIT_STOPPING_DISTANCE (100 * MICROSTEPS_PER_STEP)
 //#define ROTATOR_FULL_REVOLUTION_MICROSTEPS (440640)
-#define ROTATOR_FULL_REVOLUTION_MICROSTEPS (30000)
+#define ROTATOR_FULL_REVOLUTION_MICROSTEPS (24765) //30000
 #define ROTATOR_MAX_POSITION (MaxStepPosition)
 #define ROTATOR_HOME_POSITION (0)
 #define ROTATOR_DEFAULT_DEADZONE_DEG (0.5)
 #define ROTATOR_DEFAULT_DEADZONE (ROTATOR_FULL_REVOLUTION_MICROSTEPS / 360 * ROTATOR_DEFAULT_DEADZONE_DEG)	// default dead-zone in microsteps (~0.5°)
 
 // Serial Configuration
-#define XBEE_SERIAL Serial3 // Serial port to connect Xbee
+#define XBEE_SERIAL Serial1 // Serial port to connect Xbee
 #define HOST_SERIAL_RX_BUFFER_SIZE (16) // Receive buffer for PC/USB communications
 
 // Other hardware assignments
-#define HOME_INDEX_PIN (13) //PIN13
-#define OPEN_LIMIT_SWITCH_PIN (12) //PIN3
-#define CLOSED_LIMIT_SWITCH_PIN (11) //PIN2
+#define HOME_INDEX_PIN (20) //PIN13
+
+//#define LEFT_OPEN_LIMIT_SWITCH_PIN (12) //PIN3
+//#define LEFT_CLOSED_LIMIT_SWITCH_PIN (11) //PIN2
+//#define RIGHT_OPEN_LIMIT_SWITCH_PIN (20) //PIN3
+//#define RIGHT_CLOSED_LIMIT_SWITCH_PIN (21) //PIN2
+
+#define LEFT_LIMIT_SWITCH_PIN (20) //PIN2
+#define RIGHT_LIMIT_SWITCH_PIN (21) //PIN2
+
 #define OPEN_BUTTON_PIN (A1) //PIN5
 #define CLOSE_BUTTON_PIN (A2) //PIN6
 #define CLOCKWISE_BUTTON_PIN (OPEN_BUTTON_PIN)

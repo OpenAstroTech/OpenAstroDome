@@ -32,7 +32,7 @@ auto settings = PersistentSettings::Load();
 #if ROTATOR_MOTOR_TYPE == STEPPER_MOTOR
 auto stepper = MicrosteppingMotor(MOTOR_STEP_PIN, MOTOR_ENABLE_PIN, MOTOR_DIRECTION_PIN, stepGenerator, settings.motor);
 #elif ROTATOR_MOTOR_TYPE == DC_MOTOR
-auto stepper = DCMotor(MOTOR_STEP_PIN, MOTOR_ENABLE_PIN, MOTOR_DIRECTION_PIN, settings.motor);
+auto stepper = DCMotor(settings.motor);
 #endif
 auto &xbeeSerial = XBEE_SERIAL;
 //auto xbeeSerial = SoftwareSerial(2, 3);
@@ -104,6 +104,9 @@ void HandleSerialCommunications()
 // the setup function runs once when you press reset or power the board
 void setup()
 {
+	Serial3.begin(9600);
+	Serial3.println("Hello from Rotator!");
+
 	stepper.releaseMotor();
 	stepper.registerStopHandler(onMotorStopped);
 	pinMode(CLOCKWISE_BUTTON_PIN, INPUT_PULLUP);
@@ -116,12 +119,18 @@ void setup()
 	xbeeSerial.begin(9600);
 	delay(1000); // Let the USB/serial stack warm up a bit longer.
 	xbeeApi.reset();
-	periodicTasks.SetDuration(1000);
+	periodicTasks.SetDuration(2000);
 	HomeSensor::init();
 	// rain.init(Timer::Seconds(30));
 	pinMode(LED_BUILTIN, OUTPUT);
 	interrupts();
 	machine.ChangeState(new XBeeStartupState(machine));
+
+	Serial3.println("Settings settings.home.microstepsPerRotation:");
+	Serial3.println(settings.home.microstepsPerRotation);
+	Serial3.println("----END-----");
+
+	// settings.home.microstepsPerRotation = 49450;
 }
 
 void ProcessManualControls()
@@ -179,11 +188,13 @@ void loop()
 		ProcessManualControls();
 		// rain.loop();
 		// Release stepper holding torque if there has been no serial communication for "a long time".
+		/*
 		if (serialInactivityTimer.Expired())
 		{
 			// stepper.releaseMotor();
 			serialInactivityTimer.Stop();
 		}
+		*/
 	}
 }
 

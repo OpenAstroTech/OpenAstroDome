@@ -40,8 +40,12 @@ HomeSensor::HomeSensor(Motor *stepper, Home *settings, const uint8_t sensorPin, 
 void HomeSensor::onHomeSensorChanged()
 {
 	const auto state = digitalRead(sensorPin);
-	if (state == 1 && phase == Detecting)
+	if(state == 1 && phase == Detecting)
+	{
 		foundHome();
+	}
+	//if (state == 0 && phase == Detecting)
+	//	foundHome();
 }
 
 /*
@@ -81,7 +85,7 @@ void HomeSensor::findHome(int direction)
 	{
 		const auto distance = 2 * homeSettings->microstepsPerRotation; // Allow 2 full rotations only
 		setPhase(Detecting);
-		//motor->moveToPosition(distance);
+		motor->moveToPosition(distance);
 	}
 }
 
@@ -92,7 +96,11 @@ void HomeSensor::cancelHoming()
 {
 	setPhase(Idle);
 	if (motor->isMoving())
+	{
 		motor->SoftStop();
+		//motor->hardStop();
+	}
+		
 	
 }
 
@@ -107,6 +115,7 @@ void HomeSensor::foundHome()
 	setPhase(Stopping);
 	motor->SetCurrentPosition(homeSettings->position);
 	motor->SoftStop();
+	motor->hardStop();
 }
 
 /*
