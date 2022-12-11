@@ -15,6 +15,7 @@ public:
 	void OnTimerExpired() override;
 	void OnEnter() override;
 	void OnSerialLineReceived(const std::string& rxData) override;
+	
 private:
 	const char* stateName __ATTR_PROGMEM__ = "WaitAT";
 	};

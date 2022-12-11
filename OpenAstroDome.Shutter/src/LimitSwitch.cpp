@@ -10,23 +10,22 @@
 Motor* LimitSwitch::motor;
 volatile bool LimitSwitch::closeTriggered; // static and volatile because accessed in ISR
 
-LimitSwitch::LimitSwitch(Motor* stepper, uint8_t limit)
-	: limitPin(limit)
+LimitSwitch::LimitSwitch(Motor* stepper, uint8_t openLimit, uint8_t closeLimit)
+	: openLimitPin(openLimit), closedLimitPin(closeLimit)
 	{
 	LimitSwitch::motor = stepper;
 	}
 
 bool LimitSwitch::isOpen() const
 	{
-	return digitalRead(limitPin) == 0;
+	return digitalRead(openLimitPin) == 0;
 	}
 
 bool LimitSwitch::isClosed() const
 	{
-	return digitalRead(limitPin) == 0;
+	return digitalRead(closedLimitPin) == 0;
 	}
 
-	/*
 void LimitSwitch::onCloseLimitReached()
 	{
 	if (closeTriggered)
@@ -38,9 +37,8 @@ void LimitSwitch::onCloseLimitReached()
 		motor->moveToPosition(0);
 		}
 	}
-	*/
 
-void LimitSwitch::onLimitReached()
+void LimitSwitch::onOpenLimitReached()
 	{
 	if (motor->getCurrentVelocity() > 0)
 		{
@@ -58,9 +56,9 @@ void LimitSwitch::onMotorStopped()
 
 void LimitSwitch::init() const
 	{
-	pinMode(limitPin, INPUT_PULLUP);
-	//pinMode(closedLimitPin, INPUT_PULLUP);
+	pinMode(openLimitPin, INPUT_PULLUP);
+	pinMode(closedLimitPin, INPUT_PULLUP);
 	closeTriggered = false;
-	attachInterrupt(digitalPinToInterrupt(limitPin), onLimitReached, FALLING);
-	//attachInterrupt(digitalPinToInterrupt(closedLimitPin), onCloseLimitReached, FALLING);
+	attachInterrupt(digitalPinToInterrupt(openLimitPin), onOpenLimitReached, FALLING);
+	attachInterrupt(digitalPinToInterrupt(closedLimitPin), onCloseLimitReached, FALLING);
 	}

@@ -38,6 +38,7 @@ void ListenInAtCommandMode();
 	void useCoordinatorAddress();
 	void onXbeeFrameReceived(FrameType type, const std::vector<byte>& payload) const;
 	void TriggerSendCommand(std::string& command);
+	String GetStateName();
 private:
 	friend class IXBeeState;
 	void xbee_serial_receive() const;

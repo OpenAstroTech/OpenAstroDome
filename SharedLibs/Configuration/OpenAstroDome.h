@@ -23,8 +23,8 @@ constexpr int32_t MinStepPosition = -2000000000L;
 #define MOTOR_BOARD     (MOTOR_CONTROLLER_BTS7960)
 #define ENCODER_PIN_A    (2)   // Encoder
 #define ENCODER_PIN_B    (3)   // Encoder
-#define MOTOR_MIN_PWM   (90)   // Minimum PWM setting needed to move the motor
-#define MOTOR_MAX_PWM   (128)  // Minimum PWM setting needed to move the motor
+#define MOTOR_MIN_PWM   (70)   // Minimum PWM setting needed to move the motor
+#define MOTOR_MAX_PWM   (100)  // Maximum PWM setting needed to move the motor
 // Acceleration PID constants
 const float DCMOTOR_kp_A = 0.00;
 const float DCMOTOR_ki_A = 0.2;
@@ -68,7 +68,7 @@ const float DCMOTOR_kd_R = 0.02;
 #define HOST_SERIAL_RX_BUFFER_SIZE (16) // Receive buffer for PC/USB communications
 
 // Other hardware assignments
-#define HOME_INDEX_PIN (20) //PIN13
+#define HOME_INDEX_PIN (A15) //PIN13
 
 //#define LEFT_OPEN_LIMIT_SWITCH_PIN (12) //PIN3
 //#define LEFT_CLOSED_LIMIT_SWITCH_PIN (11) //PIN2

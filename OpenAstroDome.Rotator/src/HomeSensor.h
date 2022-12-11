@@ -11,6 +11,7 @@
 
 #include "Motor.h"
 #include "CommandProcessor.h"
+#include <pcint.h>
 
 enum HomingPhase
 	{

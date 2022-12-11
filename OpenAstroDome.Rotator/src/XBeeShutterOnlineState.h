@@ -21,6 +21,7 @@ public:
 	void OnEnter() override;
 	void OnApiRx64FrameReceived(const std::vector<byte>& payload) override;
 	void SendCommand(std::string& command) override;
+	
 private:
 	const char* stateName __ATTR_PROGMEM__ = "Online";
 	};

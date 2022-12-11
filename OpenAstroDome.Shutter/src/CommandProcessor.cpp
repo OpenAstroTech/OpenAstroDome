@@ -5,8 +5,8 @@
 #include "OpenAstroDome.h"
 #include "Version.h"
 
-CommandProcessor::CommandProcessor(Motor &motorLeft, Motor &motorRight, PersistentSettings &settings, XBeeStateMachine& machine, LimitSwitch &limitsLeft, LimitSwitch &limitsRight, BatteryMonitor &monitor)
-	: motorLeft(motorLeft), motorRight(motorRight), settings(settings), limitSwitchesLeft(limitsLeft), limitSwitchesRight(limitsRight), machine(machine), battery(monitor) {}
+CommandProcessor::CommandProcessor(Motor &motor, PersistentSettings &settings, XBeeStateMachine& machine, LimitSwitch &limits, BatteryMonitor &monitor)
+	: motor(motor), settings(settings), limitSwitches(limits), machine(machine), battery(monitor) {}
 
 int32_t CommandProcessor::microstepsToSteps(int32_t microsteps)
 {
@@ -20,7 +20,7 @@ int32_t CommandProcessor::stepsToMicrosteps(int32_t wholeSteps)
 
 int32_t CommandProcessor::getPositionInWholeSteps() const
 {
-	return microstepsToSteps(motorLeft.getCurrentPosition());
+	return microstepsToSteps(motor.getCurrentPosition());
 }
 
 void CommandProcessor::sendStatus() const
@@ -32,9 +32,9 @@ void CommandProcessor::sendStatus() const
 	converter << ResponseBuilder::header
 			  << "SES" << separator
 			  << getPositionInWholeSteps() << separator
-			  << microstepsToSteps(motorLeft.limitOfTravel()) << separator
-			  << limitSwitchesLeft.isOpen() << separator
-			  << limitSwitchesLeft.isClosed()
+			  << microstepsToSteps(motor.limitOfTravel()) << separator
+			  << limitSwitches.isOpen() << separator
+			  << limitSwitches.isClosed()
 			  << ResponseBuilder::terminator;
 	// hc12->print(converter.str().c_str());
 	machine.SendToRemoteXbee(converter.str());
@@ -110,21 +110,19 @@ void CommandProcessor::sendToLocalAndRemote(const std::string &message) const
 
 void CommandProcessor::HandleOP(const Command &command)
 {
-	if (!(limitSwitchesLeft.isOpen() || battery.lowVolts()))
+	if (!(limitSwitches.isOpen() || battery.lowVolts()))
 	{
 		sendOpenNotification();
-		motorLeft.moveToPosition(settings.motor.maxPosition);
-		motorRight.moveToPosition(settings.motor.maxPosition);
+		motor.moveToPosition(settings.motor.maxPosition);
 	}
 }
 
 void CommandProcessor::HandleCL(const Command &command)
 {
-	if (!limitSwitchesLeft.isClosed() && limitSwitchesRight.isClosed())
+	if (!limitSwitches.isClosed())
 	{
 		sendCloseNotification();
-		motorLeft.moveToPosition(-1000);
-		motorRight.moveToPosition(-1000);
+		motor.moveToPosition(-1000);
 	}
 }
 
@@ -134,8 +132,7 @@ void CommandProcessor::HandleAW(const Command &command)
 	// The minimum ramp time is 100ms, fail if the user tries to set it lower.
 	if (rampTime < MIN_RAMP_TIME)
 		return ResponseBuilder::Error();
-	motorLeft.setRampTime(rampTime);
-	motorRight.setRampTime(rampTime);
+	motor.setRampTime(rampTime);
 }
 
 void CommandProcessor::HandleAR(const Command &command) const
@@ -157,8 +154,7 @@ void CommandProcessor::HandleBW(const Command &command)
 
 void CommandProcessor::HandleSW(const Command &command)
 {
-	motorLeft.hardStop();
-	motorRight.hardStop();
+	motor.hardStop();
 }
 
 void CommandProcessor::HandleZW(const Command &command)
@@ -179,20 +175,20 @@ void CommandProcessor::HandleZD(const Command &command)
 
 void CommandProcessor::HandlePR(const Command &command) const
 {
-	const auto position = microstepsToSteps(motorLeft.getCurrentPosition());
+	const auto position = microstepsToSteps(motor.getCurrentPosition());
 	ResponseBuilder::FromInteger(command, position);
 }
 
 void CommandProcessor::HandlePW(const Command &command)
 {
 	const auto microsteps = stepsToMicrosteps(command.StepPosition);
-	motorLeft.SetCurrentPosition(microsteps);
+	motor.SetCurrentPosition(microsteps);
 }
 
 void CommandProcessor::HandleRW(const Command &command)
 {
 	const auto microsteps = stepsToMicrosteps(command.StepPosition);
-	motorLeft.SetLimitOfTravel(microsteps);
+	motor.SetLimitOfTravel(microsteps);
 }
 
 void CommandProcessor::HandleSR(const Command &command)
@@ -203,7 +199,7 @@ void CommandProcessor::HandleSR(const Command &command)
 
 void CommandProcessor::HandleRR(const Command &command) const
 {
-	const auto range = microstepsToSteps(motorLeft.limitOfTravel());
+	const auto range = microstepsToSteps(motor.limitOfTravel());
 	ResponseBuilder::FromInteger(command, range);
 }
 
@@ -214,22 +210,21 @@ void CommandProcessor::HandleFR(const Command &command) const
 
 void CommandProcessor::HandleVR(const Command &command) const
 {
-	auto maxSpeed = motorLeft.getMaximumSpeed();
+	auto maxSpeed = motor.getMaximumSpeed();
 	ResponseBuilder::FromInteger(command, microstepsToSteps(maxSpeed));
 }
 
 void CommandProcessor::HandleVW(const Command &command)
 {
 	uint16_t speed = stepsToMicrosteps(command.StepPosition);
-	if (speed < motorLeft.getMinimumSpeed())
+	if (speed < motor.getMinimumSpeed())
 		return ResponseBuilder::Error();
-	motorLeft.setMaximumSpeed(speed);
-	motorRight.setMaximumSpeed(speed);
+	motor.setMaximumSpeed(speed);
 }
 
 void CommandProcessor::HandleX(const Command &command)
 {
-	if (motorLeft.isMoving())
+	if (motor.isMoving())
 		return ResponseBuilder::FromInteger(command, 2);
 	ResponseBuilder::FromInteger(command, 0);
 }

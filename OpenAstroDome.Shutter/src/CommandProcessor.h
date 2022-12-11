@@ -19,7 +19,7 @@
 class CommandProcessor
 	{
 	public:
-		CommandProcessor(Motor& motorLeft, Motor& motorRight, PersistentSettings& settings, XBeeStateMachine& machine, LimitSwitch& limitsLeft, LimitSwitch& limitsRight, BatteryMonitor& monitor);
+		CommandProcessor(Motor& motor, PersistentSettings& settings, XBeeStateMachine& machine, LimitSwitch& limits, BatteryMonitor& monitor);
 		void HandleCommand(const Command& command); // sets the global static response
 		static int32_t microstepsToSteps(int32_t microsteps);
 		static int32_t stepsToMicrosteps(int32_t wholeSteps);
@@ -49,13 +49,9 @@ class CommandProcessor
 		void HandleZW(const Command& command); // EEPROM write (save settings)
 		void HandleZR(const Command& command); // EEPROM read (load settings)
 		void HandleZD(const Command& command); // Reset to factory settings (clears both EEPROM and working settings)
-		
-		
-		Motor& motorLeft;
-		Motor& motorRight;
+		Motor& motor;
 		PersistentSettings& settings;
-		LimitSwitch& limitSwitchesLeft;
-		LimitSwitch& limitSwitchesRight;
+		LimitSwitch& limitSwitches;
 		XBeeStateMachine& machine;
 		BatteryMonitor& battery;
 	};

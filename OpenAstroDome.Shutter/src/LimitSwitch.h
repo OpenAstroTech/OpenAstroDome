@@ -1,3 +1,4 @@
+
 // LimitSwitch.h
 
 #ifndef _LIMITSWITCH_h
@@ -13,26 +14,20 @@
 
 class LimitSwitch
 	{
-	enum ShutterState
-	{
-		OPENING,
-		CLOSING
-	};
-	
 	public:
-		LimitSwitch(Motor* stepper, uint8_t limit);
+		LimitSwitch(Motor* stepper, uint8_t openLimit, uint8_t closeLimit);
 		bool isOpen() const;
 		bool isClosed() const;
 		void init() const;
 		void onMotorStopped();
 
 	private:
-		uint8_t limitPin;
+		uint8_t openLimitPin;
+		uint8_t closedLimitPin;
 		static volatile bool closeTriggered;
 		static Motor* motor;
-		static void onLimitReached();
+		static void onOpenLimitReached();
 		static void onCloseLimitReached();
 	};
 
 #endif
-

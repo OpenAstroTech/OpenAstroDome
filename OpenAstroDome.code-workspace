@@ -65,7 +65,29 @@
 			"string_iostream": "cpp",
 			"type_traits": "cpp",
 			"typeinfo": "cpp",
-			"utility": "cpp"
+			"utility": "cpp",
+			"system_error": "cpp",
+			"xlocale": "cpp",
+			"atomic": "cpp",
+			"bit": "cpp",
+			"clocale": "cpp",
+			"compare": "cpp",
+			"concepts": "cpp",
+			"cstdint": "cpp",
+			"ctime": "cpp",
+			"tuple": "cpp",
+			"unordered_map": "cpp",
+			"xfacet": "cpp",
+			"xiosbase": "cpp",
+			"xlocbuf": "cpp",
+			"xlocinfo": "cpp",
+			"xlocmes": "cpp",
+			"xlocmon": "cpp",
+			"xlocnum": "cpp",
+			"xloctime": "cpp",
+			"xmemory": "cpp",
+			"xstddef": "cpp",
+			"xtr1common": "cpp"
 		}
 	}
 }

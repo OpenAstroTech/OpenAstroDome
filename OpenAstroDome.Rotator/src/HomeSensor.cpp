@@ -55,7 +55,8 @@ void HomeSensor::init()
 {
 	pinMode(sensorPin, INPUT_PULLUP);
 	setPhase(Idle);
-	attachInterrupt(digitalPinToInterrupt(sensorPin), onHomeSensorChanged, CHANGE);
+	//attachInterrupt(digitalPinToInterrupt(sensorPin), onHomeSensorChanged, CHANGE);
+	PCattachInterrupt<HOME_INDEX_PIN>(onHomeSensorChanged, CHANGE);
 }
 
 /// <summary>

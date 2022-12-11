@@ -101,6 +101,18 @@ void XBeeStateMachine::ChangeState(IXBeeState *newState)
 	nextState = newState;
 }
 
+String XBeeStateMachine::GetStateName()
+{
+	if(currentState != nullptr)
+	{
+		return String(currentState->name().c_str());
+	}
+		
+	else
+	{
+		return "None...";
+	}
+}
 void XBeeStateMachine::StateTransitionIfRequested()
 {
 	if (nextState != nullptr)

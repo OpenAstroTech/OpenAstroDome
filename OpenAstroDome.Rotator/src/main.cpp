@@ -17,14 +17,18 @@
 #include "HomeSensor.h"
 #include "CommandProcessor.h"
 #include "XBeeStartupState.h"
-// UNO SoftwareSerial
-#include "SoftwareSerial.h"
+
+// Display
+#include "sdd1306.h"
 
 constexpr Duration SerialInactivityTimeout = Timer::Minutes(10);
 
 // Forward declarations
 void onXbeeFrameReceived(FrameType type, std::vector<byte> &payload);
 void onMotorStopped();
+
+//void setled();
+//#define btn A8
 
 // Global scope data
 auto stepGenerator = CounterTimer1StepGenerator();
@@ -50,6 +54,9 @@ Timer serialInactivityTimer;
 // cin and cout for ArduinoSTL
 std::ohserialstream cout(Serial);
 std::ihserialstream cin(Serial);
+
+// Display
+SDD1306* display = new SDD1306();
 
 void DispatchCommand(const Command &command)
 {
@@ -104,9 +111,13 @@ void HandleSerialCommunications()
 // the setup function runs once when you press reset or power the board
 void setup()
 {
+	display->setWelcome("Rotator");
+	display->setTitel("-- Rotator Status --");
+	display->init();
+
 	Serial3.begin(9600);
 	Serial3.println("Hello from Rotator!");
-
+	
 	stepper.releaseMotor();
 	stepper.registerStopHandler(onMotorStopped);
 	pinMode(CLOCKWISE_BUTTON_PIN, INPUT_PULLUP);
@@ -129,8 +140,6 @@ void setup()
 	Serial3.println("Settings settings.home.microstepsPerRotation:");
 	Serial3.println(settings.home.microstepsPerRotation);
 	Serial3.println("----END-----");
-
-	// settings.home.microstepsPerRotation = 49450;
 }
 
 void ProcessManualControls()
@@ -176,25 +185,27 @@ void loop()
 {
 	stepper.loop();
 	HandleSerialCommunications();
-
 	machine.Loop();
+
 	if (periodicTasks.Expired())
 	{
 		periodicTasks.SetDuration(250);
 		heartbeat();
+
+		display->setMessage(machine.GetStateName());
+		display->display();
 
 		if (stepper.isMoving())
 			std::cout << "P" << std::dec << commandProcessor.getPositionInWholeSteps() << std::endl;
 		ProcessManualControls();
 		// rain.loop();
 		// Release stepper holding torque if there has been no serial communication for "a long time".
-		/*
+		
 		if (serialInactivityTimer.Expired())
 		{
 			// stepper.releaseMotor();
 			serialInactivityTimer.Stop();
 		}
-		*/
 	}
 }
 
@@ -213,3 +224,5 @@ void onMotorStopped()
 	home.onMotorStopped();
 	commandProcessor.sendStatus();
 }
+
+// void setled() {Serial3.println("TRIGGER!!!");}
