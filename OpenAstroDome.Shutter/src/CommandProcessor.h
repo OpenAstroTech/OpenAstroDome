@@ -9,17 +9,18 @@
 
 #include <ArduinoSTL.h>
 #include "Motor.h"
-#include <SoftwareSerial.h>
 #include <XBeeStateMachine.h>
 #include "PersistentSettings.h"
 #include "Command.h"
 #include "Response.h"
 #include "LimitSwitch.h"
+#include "sdd1306.h"
+#include "Shutters.h"
 
 class CommandProcessor
 	{
 	public:
-		CommandProcessor(Motor& motor, PersistentSettings& settings, XBeeStateMachine& machine, LimitSwitch& limits, BatteryMonitor& monitor);
+		CommandProcessor(Shutters* shutters,PersistentSettings& settings, XBeeStateMachine& machine, LimitSwitchRight& limitsRight, LimitSwitchLeft& limitsLeft, BatteryMonitor& monitor, SDD1306* display);
 		void HandleCommand(const Command& command); // sets the global static response
 		static int32_t microstepsToSteps(int32_t microsteps);
 		static int32_t stepsToMicrosteps(int32_t wholeSteps);
@@ -49,11 +50,15 @@ class CommandProcessor
 		void HandleZW(const Command& command); // EEPROM write (save settings)
 		void HandleZR(const Command& command); // EEPROM read (load settings)
 		void HandleZD(const Command& command); // Reset to factory settings (clears both EEPROM and working settings)
-		Motor& motor;
+		//Motor* rightMotor;
+		//Motor* leftMotor;
+		Shutters* shutters; 
 		PersistentSettings& settings;
-		LimitSwitch& limitSwitches;
+		LimitSwitchRight& limitSwitchesRight;
+		LimitSwitchLeft& limitSwitchesLeft;
 		XBeeStateMachine& machine;
 		BatteryMonitor& battery;
+		SDD1306* display;
 	};
 
 #endif

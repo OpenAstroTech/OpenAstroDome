@@ -27,8 +27,8 @@ constexpr Duration SerialInactivityTimeout = Timer::Minutes(10);
 void onXbeeFrameReceived(FrameType type, std::vector<byte> &payload);
 void onMotorStopped();
 
-//void setled();
-//#define btn A8
+// Display
+SDD1306* display = new SDD1306();
 
 // Global scope data
 auto stepGenerator = CounterTimer1StepGenerator();
@@ -40,12 +40,12 @@ auto stepper = DCMotor(settings.motor);
 #endif
 auto &xbeeSerial = XBEE_SERIAL;
 //auto xbeeSerial = SoftwareSerial(2, 3);
-HardwareSerial host(Serial);
+//HardwareSerial host(Serial);
 std::string hostReceiveBuffer;
 std::vector<byte> xbeeApiRxBuffer;
 auto xbeeApi = XBeeApi(xbeeSerial, xbeeApiRxBuffer, ReceiveHandler(onXbeeFrameReceived));
 auto machine = XBeeStateMachine(xbeeSerial, xbeeApi);
-auto commandProcessor = CommandProcessor(stepper, settings, machine);
+auto commandProcessor = CommandProcessor(stepper, settings, machine, display);
 auto home = HomeSensor(&stepper, &settings.home, HOME_INDEX_PIN, commandProcessor);
 Timer periodicTasks;
 Timer serialInactivityTimer;
@@ -55,8 +55,7 @@ Timer serialInactivityTimer;
 std::ohserialstream cout(Serial);
 std::ihserialstream cin(Serial);
 
-// Display
-SDD1306* display = new SDD1306();
+
 
 void DispatchCommand(const Command &command)
 {
@@ -71,40 +70,39 @@ void DispatchCommand(const Command &command)
  */
 void HandleSerialCommunications()
 {
-	while (Serial.available() > 0)
-	{
-		const auto rx = Serial.read();
-		if (rx < 0)
-			return; // No data available.
+	if (!Serial || Serial.available() <= 0)
+		return; // No data available.
+	const auto rx = Serial.read();
+	if (rx < 0)
+		return; // No data available.
 
-		serialInactivityTimer.SetDuration(SerialInactivityTimeout);
-		const char rxChar = char(rx);
-		switch (rxChar)
+	serialInactivityTimer.SetDuration(SerialInactivityTimeout);
+	const char rxChar = char(rx);
+	switch (rxChar)
+	{
+	case '\n': // newline - dispatch the command
+	case '\r': // carriage return - dispatch the command
+		if (hostReceiveBuffer.length() > 1)
 		{
-		case '\n': // newline - dispatch the command
-		case '\r': // carriage return - dispatch the command
-			if (hostReceiveBuffer.length() > 1)
-			{
-				const auto command = Command(hostReceiveBuffer);
-				DispatchCommand(command);
-				hostReceiveBuffer.clear();
-				if (ResponseBuilder::available())
-					std::cout
-						<< ResponseBuilder::header
-						<< ResponseBuilder::Message
-						<< ResponseBuilder::terminator
-						<< std::endl; // send response, if there is one.
-			}
-			break;
-		case '@': // Start of new command
+			const auto command = Command(hostReceiveBuffer);
+			DispatchCommand(command);
 			hostReceiveBuffer.clear();
-		default:
-			if (hostReceiveBuffer.length() < HOST_SERIAL_RX_BUFFER_SIZE)
-			{
-				hostReceiveBuffer.push_back(rxChar);
-			}
-			break;
+			if (ResponseBuilder::available())
+				std::cout
+					<< ResponseBuilder::header
+					<< ResponseBuilder::Message
+					<< ResponseBuilder::terminator
+					<< std::endl; // send response, if there is one.
 		}
+		break;
+	case '@': // Start of new command
+		hostReceiveBuffer.clear();
+	default:
+		if (hostReceiveBuffer.length() < HOST_SERIAL_RX_BUFFER_SIZE)
+		{
+			hostReceiveBuffer.push_back(rxChar);
+		}
+		break;
 	}
 }
 
@@ -124,7 +122,7 @@ void setup()
 	pinMode(COUNTERCLOCKWISE_BUTTON_PIN, INPUT_PULLUP);
 	hostReceiveBuffer.reserve(HOST_SERIAL_RX_BUFFER_SIZE);
 	xbeeApiRxBuffer.reserve(API_MAX_FRAME_LENGTH);
-	host.begin(115200);
+	Serial.begin(115200);
 	// Connect cin and cout to our SafeSerial instance
 	ArduinoSTL_Serial.connect(Serial);
 	xbeeSerial.begin(9600);
@@ -193,7 +191,7 @@ void loop()
 		heartbeat();
 
 		display->setMessage(machine.GetStateName());
-		display->display();
+		display->displayXBeeStatus();
 
 		if (stepper.isMoving())
 			std::cout << "P" << std::dec << commandProcessor.getPositionInWholeSteps() << std::endl;
@@ -224,5 +222,3 @@ void onMotorStopped()
 	home.onMotorStopped();
 	commandProcessor.sendStatus();
 }
-
-// void setled() {Serial3.println("TRIGGER!!!");}

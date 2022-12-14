@@ -228,7 +228,7 @@ float DCMotor::getAcceleratedVelocity() const
 	}
 
 /*
-	Computes the maximum velocity thatFF will still allow the motor to decelerate to minSpeed
+	Computes the maximum velocity that will still allow the motor to decelerate to minSpeed
 	before reaching the target position. We do this by computing what the velocity would have been
 	if we had started at the target position and accelerated back for n steps, then changing the sign of
 	that velocity to match the current direction of travel.
@@ -300,8 +300,8 @@ void DCMotor::ComputeAcceleratedVelocity()
 		PIDConstants = runPID;
 	if (abs(targetPosition - currentPosition) > ROTATOR_DEFAULT_DEADZONE){
 		pwm = calcFromPID(currentPosition, PIDConstants);
-		pwm.pwm = constrain(abs(pwm.pwm), MOTOR_MIN_PWM, MOTOR_MAX_PWM);
-		_rotator->run(pwm.dir, static_cast<int>(pwm.pwm));
+		pwm.pwm = constrain(abs(pwm.pwm), MOTOR_MIN_PWM, 255);
+		_rotator->run(pwm.dir,static_cast<int>(pwm.pwm));
 	} else {
 		hardStop();
 	}

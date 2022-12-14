@@ -25,7 +25,7 @@ void MicrosteppingMotor::initializeHardware() const
 
 // Creates a new motor instance with the specified I/O pins and step generator.
 
-MicrosteppingMotor::MicrosteppingMotor(uint8_t stepPin, uint8_t enablePin, uint8_t directionPin, IStepGenerator& stepper, MotorSettings& settings)
+MicrosteppingMotor::MicrosteppingMotor(uint8_t stepPin, uint8_t enablePin, uint8_t directionPin, IStepGenerator& stepper, MotorSettings& settings, bool inverse)
 	{
 	configuration = &settings;
 	stepGenerator = &stepper;
@@ -36,6 +36,7 @@ MicrosteppingMotor::MicrosteppingMotor(uint8_t stepPin, uint8_t enablePin, uint8
 	minSpeed = MIN_SPEED;
 	initializeHardware();
 	stopHandler = nullptr;
+	_inverse = inverse;
 	}
 
 /*
@@ -64,8 +65,8 @@ void MicrosteppingMotor::Step(bool state)
 // Takes account of direction reversal.
 void MicrosteppingMotor::energizeMotor() const
 	{
-	uint8_t forward = configuration->directionReversed ? HIGH : LOW;
-	uint8_t backward = configuration->directionReversed ? LOW : HIGH;
+	uint8_t forward = _inverse ? HIGH : LOW;
+	uint8_t backward = _inverse ? LOW : HIGH;
 	digitalWrite(stepPin, LOW);		// active high, so ensure we are not commanding a step.
 	digitalWrite(directionPin, direction >= 0 ? forward : backward);
 	digitalWrite(enablePin, LOW);	// Active low, so energize the coils.

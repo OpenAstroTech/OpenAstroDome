@@ -5,22 +5,22 @@
 #include "OpenAstroDome.h"
 #include "Version.h"
 
-CommandProcessor::CommandProcessor(Motor &motor, PersistentSettings &settings, XBeeStateMachine& machine, LimitSwitch &limits, BatteryMonitor &monitor)
-	: motor(motor), settings(settings), limitSwitches(limits), machine(machine), battery(monitor) {}
+CommandProcessor::CommandProcessor(Shutters* shutters, PersistentSettings &settings, XBeeStateMachine& machine, LimitSwitchRight &limitsRight, LimitSwitchLeft &limitsLeft, BatteryMonitor &monitor, SDD1306* display)
+	: shutters(shutters), settings(settings), limitSwitchesRight(limitsRight), limitSwitchesLeft(limitsLeft), machine(machine), battery(monitor), display(display) {}
 
 int32_t CommandProcessor::microstepsToSteps(int32_t microsteps)
 {
-	return microsteps / MICROSTEPS_PER_STEP;
+	return microsteps / SHUTTER_MICROSTEPS_PER_STEP;
 }
 
 int32_t CommandProcessor::stepsToMicrosteps(int32_t wholeSteps)
 {
-	return wholeSteps * MICROSTEPS_PER_STEP;
+	return wholeSteps * SHUTTER_MICROSTEPS_PER_STEP;
 }
 
 int32_t CommandProcessor::getPositionInWholeSteps() const
 {
-	return microstepsToSteps(motor.getCurrentPosition());
+	return microstepsToSteps(shutters->rightStepper->currentPosition());
 }
 
 void CommandProcessor::sendStatus() const
@@ -32,9 +32,9 @@ void CommandProcessor::sendStatus() const
 	converter << ResponseBuilder::header
 			  << "SES" << separator
 			  << getPositionInWholeSteps() << separator
-			  << microstepsToSteps(motor.limitOfTravel()) << separator
-			  << limitSwitches.isOpen() << separator
-			  << limitSwitches.isClosed()
+			  << microstepsToSteps(shutters->limitOfTravel()) << separator
+			  << limitSwitchesRight.isOpen() << separator
+			  << limitSwitchesRight.isClosed()
 			  << ResponseBuilder::terminator;
 	// hc12->print(converter.str().c_str());
 	machine.SendToRemoteXbee(converter.str());
@@ -45,6 +45,8 @@ void CommandProcessor::sendStatus() const
 
 void CommandProcessor::HandleCommand(const Command &command)
 {
+	display->displayCmd(command.RawCommand.c_str());
+
 	ResponseBuilder::FromSuccessfulCommand(command); // Default response is to echo the command.
 	if (command.IsShutterCommand())
 	{
@@ -102,7 +104,6 @@ void CommandProcessor::sendToLocalAndRemote(const std::string &message) const
 	std::ostringstream output;
 	output << ResponseBuilder::header << message << ResponseBuilder::terminator;
 	machine.SendToRemoteXbee(output.str());
-	// hc12->print(output.str().c_str());
 #ifdef SHUTTER_LOCAL_OUTPUT
 	std::cout << output.str() << std::endl;
 #endif
@@ -110,19 +111,19 @@ void CommandProcessor::sendToLocalAndRemote(const std::string &message) const
 
 void CommandProcessor::HandleOP(const Command &command)
 {
-	if (!(limitSwitches.isOpen() || battery.lowVolts()))
+	if (!(limitSwitchesRight.isOpen() || battery.lowVolts()))
 	{
 		sendOpenNotification();
-		motor.moveToPosition(settings.motor.maxPosition);
+		shutters->open();
 	}
 }
 
 void CommandProcessor::HandleCL(const Command &command)
 {
-	if (!limitSwitches.isClosed())
+	if (!limitSwitchesRight.isClosed())
 	{
 		sendCloseNotification();
-		motor.moveToPosition(-1000);
+		shutters->close();
 	}
 }
 
@@ -132,7 +133,7 @@ void CommandProcessor::HandleAW(const Command &command)
 	// The minimum ramp time is 100ms, fail if the user tries to set it lower.
 	if (rampTime < MIN_RAMP_TIME)
 		return ResponseBuilder::Error();
-	motor.setRampTime(rampTime);
+	shutters->setRampTime(rampTime);
 }
 
 void CommandProcessor::HandleAR(const Command &command) const
@@ -154,7 +155,8 @@ void CommandProcessor::HandleBW(const Command &command)
 
 void CommandProcessor::HandleSW(const Command &command)
 {
-	motor.hardStop();
+	// rightMotor->hardStop();
+	shutters->hardStop();
 }
 
 void CommandProcessor::HandleZW(const Command &command)
@@ -175,20 +177,20 @@ void CommandProcessor::HandleZD(const Command &command)
 
 void CommandProcessor::HandlePR(const Command &command) const
 {
-	const auto position = microstepsToSteps(motor.getCurrentPosition());
+	const auto position = microstepsToSteps(shutters->rightStepper->currentPosition());
 	ResponseBuilder::FromInteger(command, position);
 }
 
 void CommandProcessor::HandlePW(const Command &command)
 {
 	const auto microsteps = stepsToMicrosteps(command.StepPosition);
-	motor.SetCurrentPosition(microsteps);
+	shutters->rightStepper->setCurrentPosition(microsteps);
 }
 
 void CommandProcessor::HandleRW(const Command &command)
 {
 	const auto microsteps = stepsToMicrosteps(command.StepPosition);
-	motor.SetLimitOfTravel(microsteps);
+	shutters->SetLimitOfTravel(microsteps);
 }
 
 void CommandProcessor::HandleSR(const Command &command)
@@ -199,7 +201,7 @@ void CommandProcessor::HandleSR(const Command &command)
 
 void CommandProcessor::HandleRR(const Command &command) const
 {
-	const auto range = microstepsToSteps(motor.limitOfTravel());
+	const auto range = microstepsToSteps(shutters->limitOfTravel());
 	ResponseBuilder::FromInteger(command, range);
 }
 
@@ -210,21 +212,21 @@ void CommandProcessor::HandleFR(const Command &command) const
 
 void CommandProcessor::HandleVR(const Command &command) const
 {
-	auto maxSpeed = motor.getMaximumSpeed();
+	auto maxSpeed = shutters->getMaximumSpeed();
 	ResponseBuilder::FromInteger(command, microstepsToSteps(maxSpeed));
 }
 
 void CommandProcessor::HandleVW(const Command &command)
 {
 	uint16_t speed = stepsToMicrosteps(command.StepPosition);
-	if (speed < motor.getMinimumSpeed())
+	if (speed < shutters->getMinimumSpeed())
 		return ResponseBuilder::Error();
-	motor.setMaximumSpeed(speed);
+	shutters->setMaximumSpeed(speed);
 }
 
 void CommandProcessor::HandleX(const Command &command)
 {
-	if (motor.isMoving())
+	if (shutters->rightStepper->isRunning())
 		return ResponseBuilder::FromInteger(command, 2);
 	ResponseBuilder::FromInteger(command, 0);
 }

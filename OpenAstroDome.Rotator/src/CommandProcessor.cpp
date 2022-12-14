@@ -4,8 +4,8 @@
 #include "Version.h"
 #include <sstream>
 
-CommandProcessor::CommandProcessor(Motor& rotator, PersistentSettings& settings, XBeeStateMachine& machine)
-	: rotator(rotator), settings(settings), machine(machine) {}
+CommandProcessor::CommandProcessor(Motor& rotator, PersistentSettings& settings, XBeeStateMachine& machine, SDD1306* display)
+	: rotator(rotator), settings(settings), machine(machine), display(display) {}
 
 /*
  * Sends an encapsulated response to the host application
@@ -94,10 +94,6 @@ void CommandProcessor::sendDirection(const int direction)
 void CommandProcessor::ForwardToShutter(const Command &command) const
 {
 	machine.SendToRemoteXbee(command.RawCommand);
-	ttl->print("Forward to shutter: ");
-	ttl->println(command.RawCommand.c_str());
-
-	// Serial1.println(command.RawCommand.c_str());
 	ResponseBuilder::FromSuccessfulCommand(command);
 }
 
@@ -106,6 +102,8 @@ void CommandProcessor::HandleCommand(const Command &command) const
 	Serial3.println("Command in:");
 	Serial3.println(command.RawCommand.c_str());
 	Serial3.println("------END------");
+
+	display->displayCmd(command.RawCommand.c_str());
 
 	ResponseBuilder::FromSuccessfulCommand(command); // This is the default response unless overwritten below
 	if (command.IsShutterCommand())
@@ -206,8 +204,8 @@ void CommandProcessor::HandleAW(const Command &command) const
 {
 	auto rampTime = command.StepPosition;
 	// The minimum ramp time is 100ms, fail if the user tries to set it lower.
-	if (rampTime < MIN_RAMP_TIME)
-		ResponseBuilder::Error();
+	//if (rampTime < MIN_RAMP_TIME)
+	//	ResponseBuilder::Error();
 	rotator.setRampTime(rampTime);
 }
 
@@ -289,8 +287,8 @@ void CommandProcessor::HandleVW(const Command &command) const
 	Serial3.println("----END-----");
 
 	uint16_t speed = stepsToMicrosteps(command.StepPosition);
-	if (speed < rotator.getMinimumSpeed())
-		ResponseBuilder::Error();
+	//if (speed < rotator.getMinimumSpeed())
+	//	ResponseBuilder::Error();
 	rotator.setMaximumSpeed(speed);
 }
 

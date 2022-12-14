@@ -18,7 +18,7 @@ typedef void (*StopHandler) ();
 class MicrosteppingMotor : public IStepSequencer
 	{
 	public:
-		MicrosteppingMotor(uint8_t stepPin, uint8_t enablePin, uint8_t directionPin, IStepGenerator& stepper, MotorSettings& settings);
+		MicrosteppingMotor(uint8_t stepPin, uint8_t enablePin, uint8_t directionPin, IStepGenerator& stepper, MotorSettings& settings, bool inverse);
 		virtual void Step(bool state) final;
 		//void MoveAtVelocity(float stepsPerSecond);
 		void energizeMotor() const;
@@ -59,6 +59,7 @@ class MicrosteppingMotor : public IStepSequencer
 		float getDeceleratedVelocity() const;
 		float accelerationFromRampTime();
 		StopHandler stopHandler;
+		bool _inverse = false;
 	};
 
 // Motor Parameters (defaults)

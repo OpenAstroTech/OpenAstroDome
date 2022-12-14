@@ -4,7 +4,6 @@
 #if defined(ARDUINO) && ARDUINO >= 100
 #include "Arduino.h"
 #include "ArduinoSTL.h"
-#include "SoftwareSerial.h"
 #else
   #include "WProgram.h"
 #endif
@@ -13,13 +12,14 @@
 #include <XBeeStateMachine.h>
 #include "Command.h"
 #include "Response.h"
+#include "sdd1306.h"
 
 struct PersistentSettings;
 
 class CommandProcessor
 	{
 public:
-	CommandProcessor(Motor& rotator, PersistentSettings& settings, XBeeStateMachine& machine);
+	CommandProcessor(Motor& rotator, PersistentSettings& settings, XBeeStateMachine& machine, SDD1306* display);
 	static void responseToHost(const std::string& rxMessage);
 	void HandleCommand(const Command& command) const;
 	uint32_t getNormalizedPositionInMicrosteps() const;
@@ -64,8 +64,8 @@ private:
 	int32_t getDeadZoneWholeSteps() const;
 	Motor& rotator;
 	PersistentSettings& settings;
-	SoftwareSerial* ttl;
 	XBeeStateMachine& machine;
+	SDD1306* display;
 	};
 
 #endif

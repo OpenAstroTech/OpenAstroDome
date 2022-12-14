@@ -3,7 +3,6 @@
 #pragma once
 #include <Arduino.h>
 #include <HardwareSerial.h>
-#include <SoftwareSerial.h>
 
 #include <ArduinoSTL.h>
 #include <XBeeApi.h>
@@ -21,6 +20,7 @@ constexpr Duration XBEE_NO_HEARTBEAT_TIMEOUT = (XBEE_HEARTBEAT_INTERVAL * 2) + T
 #define XBEE_HELLO_ACK "2U2"		// (yes I am old enough to remember FidoNet).
 #define XBEE_ATTENTION "+++"		// Guard Time + Attention + Guard Time reverts XBee to AT Command Mode
 
+// #define DEBUG_XBEE_STATE
 class IXBeeState;
 
 class XBeeStateMachine

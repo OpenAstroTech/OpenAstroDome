@@ -18,15 +18,17 @@ class SDD1306
     void setWelcome(String text);
     void setTitel(String text);
     void setMessage(String text);
-    void display();
+    void displayXBeeStatus();
+
+    void displayCmd(String cmd);
   
   private:
     Adafruit_SSD1306* _display;
     String _welcome;
     String _title;
     String _message;
-    int _counter = 0;
-    bool showAlive = false;
+    int _aliveCounter = 0;
+    int _cmdCounter = -1;
 
-    void incrementCounter();
+    void incrementAliveCounter();
 };

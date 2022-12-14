@@ -16,6 +16,7 @@ constexpr int32_t MinStepPosition = -2000000000L;
 #define SHUTTER_MOTOR_TYPE  (STEPPER_MOTOR) // See Constants.h for options
 // Motor Parameters
 #define MICROSTEPS_PER_STEP (1) // Should match DIP switches on stepper driver
+#define SHUTTER_MICROSTEPS_PER_STEP (16) // Should match DIP switches on stepper driver
 #define MIN_SPEED (250)         // Minimum speed that can be timed by the hardware timer
 #define MIN_RAMP_TIME (100)     // Minimum ramp up/down time in milliseconds
 
@@ -40,13 +41,13 @@ const float DCMOTOR_kd_R = 0.02;
 #define MOTOR_PWM_PIN_R (10)
 // SHEILDMD10
 #define MOTOR_DIRECTION_PIN (8)
-#define LEFT_MOTOR_DIRECTION_PIN (8)
-#define RIGHT_MOTOR_DIRECTION_PIN (11)
+#define LEFT_MOTOR_DIRECTION_PIN (11)
+#define RIGHT_MOTOR_DIRECTION_PIN (8)
 #define MOTOR_PWM_PIN (9)
 
 // Stepper Motor defaults
-#define LEFT_MOTOR_STEP_PIN (7) //12
-#define RIGHT_MOTOR_STEP_PIN (10) //12
+#define LEFT_MOTOR_STEP_PIN (10) //12
+#define RIGHT_MOTOR_STEP_PIN (7) //12
 //#define MOTOR_DIRECTION_PIN (8) //11
 #define MOTOR_ENABLE_PIN (9) //10
 
@@ -75,8 +76,10 @@ const float DCMOTOR_kd_R = 0.02;
 //#define RIGHT_OPEN_LIMIT_SWITCH_PIN (20) //PIN3
 //#define RIGHT_CLOSED_LIMIT_SWITCH_PIN (21) //PIN2
 
-#define LEFT_LIMIT_SWITCH_PIN (20) //PIN2
-#define RIGHT_LIMIT_SWITCH_PIN (21) //PIN2
+#define RIGHT_OPEN_LIMIT_SWITCH_PIN (A14) //PIN2
+#define RIGHT_CLOSED_SWITCH_PIN (A15) //PIN2
+#define LEFT_OPEN_LIMIT_SWITCH_PIN (A13) //PIN2
+#define LEFT_CLOSED_LIMIT_SWITCH_PIN (A12) //PIN2
 
 #define OPEN_BUTTON_PIN (A1) //PIN5
 #define CLOSE_BUTTON_PIN (A2) //PIN6

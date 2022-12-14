@@ -32,19 +32,32 @@ void SDD1306::setMessage(String message)
     _message = message;
 }
 
-void SDD1306::incrementCounter()
+void SDD1306::incrementAliveCounter()
 {
-	if(_counter >= 7)
+	if(_aliveCounter >= 7)
 	{
-		_counter = 0;
+		_aliveCounter = 0;
 	}
 	else {
-		_counter++;
+		_aliveCounter++;
 	}
 }
 
-void SDD1306::display()
+void SDD1306::displayXBeeStatus()
 {
+	if(_cmdCounter >= 0)
+	{
+		if(_cmdCounter > 8)
+		{
+			_cmdCounter = -1;
+		}
+		else
+		{
+			_cmdCounter++;
+			return;
+		}
+	}
+	
     _display->clearDisplay();
 	_display->setTextSize(1);
 	_display->setTextColor(WHITE);
@@ -54,15 +67,30 @@ void SDD1306::display()
 	_display->setCursor(0,16);
 	_display->println(_message);
 	
-	if(_counter == 0)
+	if(_aliveCounter == 0)
 	{
 		_display->drawLine(0, 12, 16, 12, 1);
 	}
 	else 
 	{
-		int offset = 16*_counter;
+		int offset = 16*_aliveCounter;
 		_display->drawLine(offset, 12, offset+16, 12, 1);
 	}
 	_display->display();
-	incrementCounter();
+	incrementAliveCounter();
+}
+
+void SDD1306::displayCmd(String cmd)
+{
+	_cmdCounter = 0;
+
+	_display->clearDisplay();
+	_display->setTextSize(1);
+	_display->setTextColor(WHITE);
+	_display->setCursor(0,0);
+	_display->println("Command");
+	_display->setTextSize(2);
+	_display->setCursor(0,16);
+	_display->println(cmd);
+	_display->display();
 }
