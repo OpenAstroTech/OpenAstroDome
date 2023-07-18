@@ -15,7 +15,7 @@ constexpr int32_t MinStepPosition = -2000000000L;
 #define ROTATOR_MOTOR_TYPE  (DC_MOTOR) // See Constants.h for options
 #define SHUTTER_MOTOR_TYPE  (DC_MOTOR) // See Constants.h for options
 // Motor Parameters
-#define MICROSTEPS_PER_STEP (8) // Should match DIP switches on stepper driver
+#define MICROSTEPS_PER_STEP (2) // Should match DIP switches on stepper driver
 #define MIN_SPEED (250)         // Minimum speed that can be timed by the hardware timer
 #define MIN_RAMP_TIME (100)     // Minimum ramp up/down time in milliseconds
 
@@ -52,7 +52,7 @@ const float DCMOTOR_kd_R = 0.02;
 #define SHUTTER_FULL_OPEN_DEFAULT (46000UL * MICROSTEPS_PER_STEP)
 #define SHUTTER_LIMIT_STOPPING_DISTANCE (100 * MICROSTEPS_PER_STEP)
 //#define ROTATOR_FULL_REVOLUTION_MICROSTEPS (440640)
-#define ROTATOR_FULL_REVOLUTION_MICROSTEPS (30000)
+#define ROTATOR_FULL_REVOLUTION_MICROSTEPS (42977)
 #define ROTATOR_MAX_POSITION (MaxStepPosition)
 #define ROTATOR_HOME_POSITION (0)
 #define ROTATOR_DEFAULT_DEADZONE_DEG (0.5)
