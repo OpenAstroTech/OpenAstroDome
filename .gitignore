@@ -188,6 +188,7 @@ _pkginfo.txt
 # Visual Studio Code cache files
 
 .vscode/
+.pio/
 
 # Visual Studio cache files
 # files ending in .cache can be ignored
