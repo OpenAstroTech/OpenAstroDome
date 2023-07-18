@@ -81,7 +81,7 @@ void HomeSensor::findHome(int direction)
 	{
 		const auto distance = 2 * homeSettings->microstepsPerRotation; // Allow 2 full rotations only
 		setPhase(Detecting);
-		//motor->moveToPosition(distance);
+		motor->moveToPosition(distance);
 	}
 }
 
