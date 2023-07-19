@@ -11,7 +11,7 @@
 // #include <DCMotor.h>
 #include <XBeeApi.h>
 #include <Timer.h>
-// #include "RainSensor.h"
+#include "RainSensor.h"
 #include "OpenAstroDome.h"
 #include "PersistentSettings.h"
 #include "HomeSensor.h"
@@ -45,7 +45,7 @@ auto commandProcessor = CommandProcessor(stepper, settings, machine);
 auto home = HomeSensor(&stepper, &settings.home, HOME_INDEX_PIN, commandProcessor);
 Timer periodicTasks;
 Timer serialInactivityTimer;
-// auto rain = RainSensor(RAIN_SENSOR_PIN);
+auto rain = RainSensor(RAIN_SENSOR_PIN);
 
 // cin and cout for ArduinoSTL
 std::ohserialstream cout(Serial);
@@ -177,7 +177,7 @@ void loop()
 		if (stepper.isMoving())
 			std::cout << "P" << std::dec << commandProcessor.getPositionInWholeSteps() << std::endl;
 		ProcessManualControls();
-		// rain.loop();
+		rain.loop();
 		// Release stepper holding torque if there has been no serial communication for "a long time".
 		if (serialInactivityTimer.Expired())
 		{
