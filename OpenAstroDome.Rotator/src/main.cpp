@@ -118,7 +118,7 @@ void setup()
 	xbeeApi.reset();
 	periodicTasks.SetDuration(1000);
 	HomeSensor::init();
-	// rain.init(Timer::Seconds(30));
+	rain.init(Timer::Seconds(30));
 	pinMode(LED_BUILTIN, OUTPUT);
 	interrupts();
 	machine.ChangeState(new XBeeStartupState(machine));
