@@ -269,10 +269,11 @@ void DCMotor::hardStop()
  */
 void DCMotor::SoftStop()
 	{
-	if (!isMoving()) return;
-	const auto current = getCurrentPosition();
-	const auto distance = distanceToStop();
-	targetPosition = current + distance;
+	//if (!isMoving()) return;
+	//const auto current = getCurrentPosition();
+	//const auto distance = distanceToStop();
+	//targetPosition = current + distance;
+	hardStop();
 	}
 
 void DCMotor::loop()
