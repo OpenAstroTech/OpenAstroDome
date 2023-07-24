@@ -138,7 +138,7 @@ void ProcessManualControls()
 	}
 	if (clockwiseButtonChanged && !clockwiseButtonPressed)
 	{
-		stepper.hardStop();
+		stepper.SoftStop();
 	}
 	clockwiseButtonLastState = clockwiseButtonPressed;
 	const bool counterclockwiseButtonPressed = digitalRead(COUNTERCLOCKWISE_BUTTON_PIN) == 0;
@@ -150,7 +150,7 @@ void ProcessManualControls()
 	}
 	if (counterclockwiseButtonChanged && !counterclockwiseButtonPressed)
 	{
-		stepper.hardStop();
+		stepper.SoftStop();
 	}
 	counterclockwiseButtonLastState = counterclockwiseButtonPressed;
 }

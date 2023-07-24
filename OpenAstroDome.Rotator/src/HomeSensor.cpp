@@ -92,7 +92,7 @@ void HomeSensor::cancelHoming()
 {
 	setPhase(Idle);
 	if (motor->isMoving())
-		motor->hardStop();
+		motor->SoftStop();
 	
 }
 
@@ -106,7 +106,7 @@ void HomeSensor::foundHome()
 {
 	setPhase(Stopping);
 	motor->SetCurrentPosition(homeSettings->position);
-	motor->hardStop();
+	motor->SoftStop();
 }
 
 /*
