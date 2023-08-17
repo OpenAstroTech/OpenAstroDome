@@ -21,6 +21,7 @@
 void onMotorStopped(); // Forward reference
 
 Timer periodicTasks;
+Timer limitSwitchTimer;
 auto stepGenerator = CounterTimer1StepGenerator();
 auto settings = PersistentSettings::Load();
 #if SHUTTER_MOTOR_TYPE == STEPPER_MOTOR
@@ -134,6 +135,7 @@ void setup()
 	xbeeSerial.begin(9600);
 
 	periodicTasks.SetDuration(1000);
+	limitSwitchTimer.SetDuration(1000);
 	interrupts();
 	machine.ChangeState(new XBeeStartupState(machine));
 	machine.ChangeState(new XBeeOnlineState(machine));
@@ -153,6 +155,9 @@ void loop()
 #if !DEBUG_CONSERVE_FLASH
 	batteryMonitor.loop();
 #endif
+		limitSwitchTimer.SetDuration(100);
+		limitSwitches.loop();
+	}
 	if (periodicTasks.Expired())
 	{
 		periodicTasks.SetDuration(250);

@@ -12,6 +12,7 @@ class SHIELDMD10
     void brake();
     bool isRunning();
     int readCurrent();
+    bool halt;
 
   private:
     bool _isRunning;

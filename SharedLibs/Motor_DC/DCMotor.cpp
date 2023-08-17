@@ -90,6 +90,7 @@ void DCMotor::setRampTime(uint16_t milliseconds)
 */
 void DCMotor::moveToPosition(int32_t position)
 	{
+	_rotator->halt = false;
 	positionError = position - getCurrentPosition();
 	targetPosition = position;
 	direction = sgn(positionError);
@@ -257,6 +258,8 @@ float DCMotor::getDeceleratedVelocity() const
 void DCMotor::hardStop()
 	{
 	_rotator->stop();
+	_rotator->halt = true;
+	targetPosition = getCurrentPosition();
 	currentAcceleration = 0;
 	currentVelocity = 0;
 	direction = 0;
@@ -295,11 +298,8 @@ void DCMotor::ComputeAcceleratedVelocity()
 	int32_t currentPosition = getCurrentPosition();
 	int32_t currentPositionError = targetPosition - currentPosition;
 	PIDSettings PIDConstants;
-	if (millis() < (configuration->rampTimeMilliseconds + startTime)) // Use acceleration PID settings when ramping up
-		PIDConstants = accelerationPID;
-	else
-		PIDConstants = runPID;
-	if (abs(targetPosition - currentPosition) > ROTATOR_DEFAULT_DEADZONE){
+	PIDConstants = runPID;
+	if (abs(targetPosition - currentPosition) > static_cast<int>(ROTATOR_DEFAULT_DEADZONE)){
 		pwm = calcFromPID(currentPosition, PIDConstants);
 		pwm.pwm = constrain(abs(pwm.pwm), MOTOR_MIN_PWM, 255);
 		_rotator->run(pwm.dir,static_cast<int>(pwm.pwm));

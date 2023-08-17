@@ -2,7 +2,8 @@
 
 SHIELDMD10::SHIELDMD10()
 {
-    _isRunning = false;    
+    _isRunning = false;
+    halt = true;
     pinMode(MOTOR_DIRECTION_PIN, OUTPUT);
     pinMode(MOTOR_PWM_PIN, OUTPUT);
 }
@@ -10,17 +11,19 @@ SHIELDMD10::SHIELDMD10()
 void SHIELDMD10::run(int dir, int pwm)  // dir is 0 or 1
 {
     digitalWrite(MOTOR_DIRECTION_PIN, dir);
-    analogWrite(MOTOR_PWM_PIN, pwm);
+    analogWrite(MOTOR_PWM_PIN, pwm * !halt);
     _isRunning = true;
 }
 void SHIELDMD10::stop()
 {
+    halt = true;
     analogWrite(MOTOR_PWM_PIN, LOW);
     _isRunning = false;
 }
 
 void SHIELDMD10::brake()
 {
+    halt = true;
     analogWrite(MOTOR_PWM_PIN, LOW);
     _isRunning = false;
 }

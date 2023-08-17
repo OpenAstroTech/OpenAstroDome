@@ -36,7 +36,6 @@ void CommandProcessor::sendStatus() const
 			  << limitSwitches.isOpen() << separator
 			  << limitSwitches.isClosed()
 			  << ResponseBuilder::terminator;
-	// hc12->print(converter.str().c_str());
 	machine.SendToRemoteXbee(converter.str());
 #ifdef SHUTTER_LOCAL_OUTPUT
 	std::cout << converter.str() << std::endl;
@@ -113,7 +112,9 @@ void CommandProcessor::HandleOP(const Command &command)
 	if (!(limitSwitches.isOpen() || battery.lowVolts()))
 	{
 		sendOpenNotification();
+		limitSwitches.setShutterStatus("OPENING");
 		motor.moveToPosition(settings.motor.maxPosition);
+
 	}
 }
 
@@ -122,7 +123,8 @@ void CommandProcessor::HandleCL(const Command &command)
 	if (!limitSwitches.isClosed())
 	{
 		sendCloseNotification();
-		motor.moveToPosition(-1000);
+		limitSwitches.setShutterStatus("CLOSING");
+		motor.moveToPosition(0);
 	}
 }
 
@@ -154,7 +156,9 @@ void CommandProcessor::HandleBW(const Command &command)
 
 void CommandProcessor::HandleSW(const Command &command)
 {
+	motor.SetCurrentPosition(1000);
 	motor.hardStop();
+	limitSwitches.setShutterStatus("UNKNOWN");
 }
 
 void CommandProcessor::HandleZW(const Command &command)

@@ -11,6 +11,7 @@ BTS7960::BTS7960(uint8_t L_EN, uint8_t R_EN, uint8_t L_PWM, uint8_t R_PWM)
     pinMode(_L_EN, OUTPUT);
     pinMode(_R_EN, OUTPUT);
     _isRunning = false;
+    halt = true;
 }
 
 void BTS7960::run(int dir, int pwm)
@@ -19,11 +20,11 @@ void BTS7960::run(int dir, int pwm)
     if (dir = 0){
         analogWrite(_L_PWM, 0);
         delayMicroseconds(100);
-        analogWrite(_R_PWM, pwm);
+        analogWrite(_R_PWM, pwm * !halt);
     } else if (dir = 1){
         analogWrite(_R_PWM, 0);
         delayMicroseconds(100);
-        analogWrite(_L_PWM, pwm);
+        analogWrite(_L_PWM, pwm * !halt);
     }
     _isRunning = true;
 }
@@ -46,6 +47,7 @@ void BTS7960::Disable()
 
 void BTS7960::stop()
 {
+    halt = true;
     analogWrite(_L_PWM, LOW);
     analogWrite(_R_PWM, LOW);
     Disable();

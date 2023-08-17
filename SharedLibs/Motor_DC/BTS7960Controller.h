@@ -17,6 +17,7 @@ class BTS7960
     void brake();
     bool isRunning();
     int readCurrent();
+    bool halt;
 
   private:
     uint8_t _L_EN;

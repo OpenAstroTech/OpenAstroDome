@@ -29,9 +29,9 @@ const float DCMOTOR_kp_A = 0.00;
 const float DCMOTOR_ki_A = 0.1;
 const float DCMOTOR_kd_A = 0.00;
 // Running PID constants
-const float DCMOTOR_kp_R = 1.0;
-const float DCMOTOR_ki_R = 0.0;
-const float DCMOTOR_kd_R = 0.1;
+const float DCMOTOR_kp_R = 5.0;
+const float DCMOTOR_ki_R = 1.0;
+const float DCMOTOR_kd_R = 1.0;
 // BTS7960
 #define MOTOR_ENABLE_PIN_L  (7)
 #define MOTOR_ENABLE_PIN_R  (8)
@@ -55,7 +55,7 @@ const float DCMOTOR_kd_R = 0.1;
 #define ROTATOR_FULL_REVOLUTION_MICROSTEPS (10613)
 #define ROTATOR_MAX_POSITION (MaxStepPosition)
 #define ROTATOR_HOME_POSITION (0)
-#define ROTATOR_DEFAULT_DEADZONE_DEG (0.1)
+#define ROTATOR_DEFAULT_DEADZONE_DEG (0.03)
 #define ROTATOR_DEFAULT_DEADZONE (ROTATOR_FULL_REVOLUTION_MICROSTEPS / 360 * ROTATOR_DEFAULT_DEADZONE_DEG)	// default dead-zone in microsteps (~0.5°)
 
 // Serial Configuration

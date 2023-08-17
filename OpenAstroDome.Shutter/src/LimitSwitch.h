@@ -19,14 +19,20 @@ class LimitSwitch
 		bool isClosed() const;
 		void init() const;
 		void onMotorStopped();
+		bool isOpening() const;
+		bool isClosing() const;
+		void setShutterStatus(String status);
+		void loop();
 
 	private:
 		uint8_t openLimitPin;
 		uint8_t closedLimitPin;
-		static volatile bool closeTriggered;
+		uint8_t movementDirection;
+		String shutterStatus;
+		//static volatile bool closeTriggered;
 		static Motor* motor;
-		static void onOpenLimitReached();
-		static void onCloseLimitReached();
+		void onOpenLimitReached();
+		void onCloseLimitReached();
 	};
 
 #endif
