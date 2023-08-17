@@ -155,6 +155,8 @@ void loop()
 #if !DEBUG_CONSERVE_FLASH
 	batteryMonitor.loop();
 #endif
+	if (limitSwitchTimer.Expired())
+	{
 		limitSwitchTimer.SetDuration(100);
 		limitSwitches.loop();
 	}
