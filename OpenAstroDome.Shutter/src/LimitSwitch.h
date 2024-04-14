@@ -22,7 +22,7 @@ class LimitSwitch
 		bool isOpening() const;
 		bool isClosing() const;
 		void setShutterStatus(String status);
-		void loop();
+		std::string loop();
 
 	private:
 		uint8_t openLimitPin;

@@ -40,6 +40,7 @@ auto xbee = XBeeApi(xbeeSerial, xbeeApiRxBuffer, ReceiveHandler(HandleFrameRecei
 auto machine = XBeeStateMachine(xbeeSerial, xbee);
 auto batteryMonitor = BatteryMonitor(machine, BATTERY_SENSOR_PIN, settings.batteryMonitor);
 auto commandProcessor = CommandProcessor(stepper, settings, machine, limitSwitches, batteryMonitor);
+std::string status;
 
 // cin and cout for ArduinoSTL
 
@@ -158,7 +159,13 @@ void loop()
 	if (limitSwitchTimer.Expired())
 	{
 		limitSwitchTimer.SetDuration(100);
-		limitSwitches.loop();
+		status = limitSwitches.loop();
+		if (status == "open"){
+			commandProcessor.sendOpenNotification();
+		}
+		else if (status == "closed"){
+			commandProcessor.sendCloseNotification();
+		}
 	}
 	if (periodicTasks.Expired())
 	{

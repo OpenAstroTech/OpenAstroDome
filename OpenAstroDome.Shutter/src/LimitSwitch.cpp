@@ -79,13 +79,35 @@ void LimitSwitch::onMotorStopped()
 	shutterStatus = "UNKNOWN";
 	}
 
-void LimitSwitch::loop(){
-	if (isOpen() && (shutterStatus == "OPENING" || shutterStatus == "UNKNOWN")){
-		onOpenLimitReached();
+std::string LimitSwitch::loop()
+	{
+	if (isOpen()){
+		if (shutterStatus == "OPENING" || shutterStatus == "UNKNOWN"){
+			onOpenLimitReached();
+			return "open";
+		}
+		else if(shutterStatus == "CLOSED"){
+			onOpenLimitReached();
+			return "open";
+		}
 	}
-	else if (isClosed() && (shutterStatus == "CLOSING" || shutterStatus == "UNKNOWN")){
-		onCloseLimitReached();
-	}	
+	else if (isClosed()){
+		if (shutterStatus == "CLOSING" || shutterStatus == "UNKNOWN"){
+			onCloseLimitReached();
+			return "closed";
+		}
+		else if (shutterStatus == "OPEN"){
+			onCloseLimitReached();
+			return "closed";
+		}
+	}
+	else if (!isClosed() && !isOpen()){
+		if (shutterStatus == "OPEN" || shutterStatus == "CLOSED"){
+			shutterStatus = "UNKNOWN";
+			return "open";
+		}
+	}
+	return "unknown";
 	}
 
 void LimitSwitch::init() const
