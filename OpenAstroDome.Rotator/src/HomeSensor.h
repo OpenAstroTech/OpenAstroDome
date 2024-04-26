@@ -40,6 +40,8 @@ public:
 	static void cancelHoming();
 	void onMotorStopped() const;
 	static bool homingInProgress();
+	bool isHome();
+	bool loop();
 private:
 	static volatile HomingPhase phase;
 	static uint8_t sensorPin;
@@ -47,7 +49,7 @@ private:
 	static Home* homeSettings;
 	CommandProcessor& commandProcessor;
 	static void foundHome();
-	static void onHomeSensorChanged();
+	//static void onHomeSensorChanged();
 	static void setPhase(HomingPhase newPhase);
 	};
 

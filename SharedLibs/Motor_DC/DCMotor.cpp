@@ -16,7 +16,6 @@ DCMotor::DCMotor(uint8_t stepPin, uint8_t enablePin, uint8_t directionPin, Motor
 		previousTime = 0;
 		integralError = 0;
 		minSpeed = MIN_SPEED;
-		stopHandler = nullptr;
 		accelerationPID.DCMOTOR_kp = DCMOTOR_kp_A;
 		accelerationPID.DCMOTOR_ki = DCMOTOR_ki_A;
 		accelerationPID.DCMOTOR_kd = DCMOTOR_kd_A;
@@ -66,14 +65,6 @@ void DCMotor::energizeMotor() const
 void DCMotor::releaseMotor()
 	{
 		_rotator->stop();
-	}
-
-/*
- * Registers a method to be called whenever the motor stops.
- */
-void DCMotor::registerStopHandler(StopHandler handler)
-	{
-	this->stopHandler = handler;
 	}
 
 void DCMotor::setRampTime(uint16_t milliseconds)
@@ -263,10 +254,7 @@ void DCMotor::hardStop()
 	currentAcceleration = 0;
 	currentVelocity = 0;
 	direction = 0;
-	if (stopHandler != nullptr)
-		stopHandler();
 	}
-
 /*
  * Decelerate to a stop in the shortest distance allowed by the current acceleration.
  */

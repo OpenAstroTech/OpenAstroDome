@@ -18,8 +18,6 @@
 #include "SHIELDMD10Controller.h"
 #endif
 
-typedef void (*StopHandler) ();
-
 struct PIDSettings
 	{
 		float DCMOTOR_kp;
@@ -41,7 +39,6 @@ class DCMotor : public Motor
 		//void MoveAtVelocity(float stepsPerSecond);
 		void energizeMotor() const;
 		void releaseMotor();
-		void registerStopHandler(StopHandler handler);
 		void setRampTime(uint16_t milliseconds);
 		virtual void hardStop();
 		virtual void SoftStop();
@@ -78,7 +75,6 @@ class DCMotor : public Motor
 		float getAcceleratedVelocity() const;
 		float getDeceleratedVelocity() const;
 		float accelerationFromRampTime();
-		StopHandler stopHandler;
 		float positionError;
 		float previousTime;
 		float integralError;

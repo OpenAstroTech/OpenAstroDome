@@ -105,7 +105,6 @@ void HandleSerialCommunications()
 void setup()
 {
 	stepper.releaseMotor();
-	stepper.registerStopHandler(onMotorStopped);
 	pinMode(CLOCKWISE_BUTTON_PIN, INPUT_PULLUP);
 	pinMode(COUNTERCLOCKWISE_BUTTON_PIN, INPUT_PULLUP);
 	hostReceiveBuffer.reserve(HOST_SERIAL_RX_BUFFER_SIZE);
@@ -169,10 +168,12 @@ void loop()
 	HandleSerialCommunications();
 
 	machine.Loop();
+	home.loop();
 	if (periodicTasks.Expired())
 	{
 		periodicTasks.SetDuration(250);
-		heartbeat();
+		//Serial.println(home.isHome());
+		//heartbeat();
 
 		if (stepper.isMoving())
 			std::cout << "P" << std::dec << commandProcessor.getPositionInWholeSteps() << std::endl;
@@ -191,14 +192,4 @@ void loop()
 void onXbeeFrameReceived(FrameType type, std::vector<byte> &payload)
 {
 	machine.onXbeeFrameReceived(type, payload);
-}
-
-// Handle the motor stop event from the stepper driver.
-void onMotorStopped()
-{
-	// std::cout << "STOP" << std::endl;
-	//  First, "normalize" the step position
-	settings.motor.currentPosition = commandProcessor.getNormalizedPositionInMicrosteps();
-	home.onMotorStopped();
-	commandProcessor.sendStatus();
 }

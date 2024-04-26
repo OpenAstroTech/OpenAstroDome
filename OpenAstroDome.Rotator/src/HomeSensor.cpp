@@ -42,7 +42,7 @@ void HomeSensor::onHomeSensorChanged()
 	const auto state = digitalRead(sensorPin);
 	if (state == 1 && phase == Detecting)
 		foundHome();
-}
+}*/
 
 /*
  * Configures the hardware pin ready for use and attaches the interrupt.
@@ -51,7 +51,8 @@ void HomeSensor::init()
 {
 	pinMode(sensorPin, INPUT_PULLUP);
 	setPhase(Idle);
-	attachInterrupt(digitalPinToInterrupt(sensorPin), onHomeSensorChanged, CHANGE);
+	if (digitalRead(sensorPin) == 0){foundHome();}
+	//attachInterrupt(digitalPinToInterrupt(sensorPin), onHomeSensorChanged, CHANGE);
 }
 
 /// <summary>
@@ -104,35 +105,27 @@ void HomeSensor::cancelHoming()
  */
 void HomeSensor::foundHome()
 {
-	setPhase(Stopping);
+	setPhase(AtHome);
 	motor->SetCurrentPosition(homeSettings->position);
 	motor->SoftStop();
-}
-
-/*
- * Handles the onMotorStopped event. Action depends on the homing phase.
- */
-void HomeSensor::onMotorStopped() const
-{
-#ifdef DEBUG_HOME
-	std::cout << "Hstop " << phase << std::endl;
-#endif
-	if (phase == Reversing)
-	{
-		setPhase(AtHome);
-		return;
-	}
-	if (phase == Stopping)
-	{
-		setPhase(Reversing);
-		const auto target = commandProcessor.targetStepPosition(homeSettings->position);
-		motor->moveToPosition(target);
-		return;
-	}
-	setPhase(Idle);
 }
 
 bool HomeSensor::homingInProgress()
 {
 	return !(phase == Idle || phase == AtHome);
 }
+
+bool HomeSensor::loop()
+	{
+	if (isHome()){
+		if (homingInProgress()){
+			foundHome();
+		}
+		return false;
+	}
+	}
+
+bool HomeSensor::isHome()
+	{
+	return digitalRead(sensorPin) == 0;
+	}
