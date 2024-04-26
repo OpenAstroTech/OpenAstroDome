@@ -36,7 +36,7 @@ HomeSensor::HomeSensor(Motor *stepper, Home *settings, const uint8_t sensorPin, 
 /*
  * Triggered as an interrupt whenever the home sensor pin changes state.
  * Synchronizes the current motor stop position to the calibrated home position.
- */
+ 
 void HomeSensor::onHomeSensorChanged()
 {
 	const auto state = digitalRead(sensorPin);
