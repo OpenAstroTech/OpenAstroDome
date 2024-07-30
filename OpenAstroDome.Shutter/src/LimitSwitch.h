@@ -11,6 +11,15 @@
 
 #include "Motor.h"
 
+enum ShutterStatus
+	{
+	Unknown = 0,
+	Open,
+	Closed,
+	Opening,
+	Closing,
+	};
+
 class LimitSwitch
 	{
 	public:
@@ -22,13 +31,16 @@ class LimitSwitch
 		bool isOpening() const;
 		bool isClosing() const;
 		void setShutterStatus(String status);
-		std::string loop();
+		void loop();
+		static void setShutterStatus(ShutterStatus newStatus);
+		ShutterStatus getShutterStatus();
 
 	private:
+		static ShutterStatus shutterStatus;
 		uint8_t openLimitPin;
 		uint8_t closedLimitPin;
 		uint8_t movementDirection;
-		String shutterStatus;
+		//String shutterStatus;
 		//static volatile bool closeTriggered;
 		static Motor* motor;
 		void onOpenLimitReached();

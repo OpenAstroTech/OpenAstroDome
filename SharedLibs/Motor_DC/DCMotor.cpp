@@ -5,7 +5,7 @@ DCMotor::DCMotor(uint8_t stepPin, uint8_t enablePin, uint8_t directionPin, Motor
 		//the DCMotor class is made of an encoder and a PWM motor controller board. Inputs and functions are to emulate that of a stepper motor. Each "step" will increment the desired encoder position in the PID control loop
 
 		#if MOTOR_BOARD == MOTOR_CONTROLLER_BTS7960
-			_rotator = new BTS7960::Motor();
+			_rotator = new BTS7960();
 		#elif MOTOR_BOARD == MOTOR_CONTROLLER_SHIELDMD10
 			_rotator = new SHIELDMD10();
 		#endif
@@ -16,55 +16,21 @@ DCMotor::DCMotor(uint8_t stepPin, uint8_t enablePin, uint8_t directionPin, Motor
 		previousTime = 0;
 		integralError = 0;
 		minSpeed = MIN_SPEED;
-		accelerationPID.DCMOTOR_kp = DCMOTOR_kp_A;
-		accelerationPID.DCMOTOR_ki = DCMOTOR_ki_A;
-		accelerationPID.DCMOTOR_kd = DCMOTOR_kd_A;
-		runPID.DCMOTOR_kp = DCMOTOR_kp_R;
-		runPID.DCMOTOR_ki = DCMOTOR_ki_R;
-		runPID.DCMOTOR_kd = DCMOTOR_kd_R;
+		PID.DCMOTOR_kp = DCMOTOR_kp;
+		PID.DCMOTOR_ki = DCMOTOR_ki;
+		PID.DCMOTOR_kd = DCMOTOR_kd;
 		_encoder = new Encoder(configuration->currentPosition, ENCODER_PIN_A, ENCODER_PIN_B);
-	}
-
-void DCMotor::Step(bool state)
-	{
-		// Not used
-	}
-
-PWMSettings DCMotor::calcFromPID(int32_t currentPosition, PIDSettings PIDConstants)
-	{
-		// positional error
-		int32_t currentPositionError = targetPosition - currentPosition;
-
-		// time difference
-		long currentTime = micros();
-		float deltaTime = ((float) (currentTime - previousTime))/( 1.0e6 );
-		previousTime = currentTime;
-		// derivative error
-		float derivativeError = (currentPositionError-positionError)/(deltaTime);
-		// integral error
-		integralError = integralError + currentPositionError*deltaTime;
-		// store previous error for future calculation
-		positionError = currentPositionError;
-		// control signal
-		PWMSettings pwm;
-		pwm.pwm = PIDConstants.DCMOTOR_kp*currentPositionError + PIDConstants.DCMOTOR_kd*derivativeError + PIDConstants.DCMOTOR_ki*integralError;
-		pwm.dir = 0;
-		if (pwm.pwm < 0)
-			pwm.dir = 1;
-		return pwm;
-	}
-
-// Energizes the motor coils (applies holding torque) and prepares for stepping.
-// Takes account of direction reversal.
-void DCMotor::energizeMotor() const
-	{
-		//Nothing
 	}
 
 // Disables the motor coils (releases holding torque).
 void DCMotor::releaseMotor()
 	{
 		_rotator->stop();
+	}
+
+void DCMotor::setWraparound(bool wraparound)
+	{
+		configuration->wraparound = wraparound;
 	}
 
 void DCMotor::setRampTime(uint16_t milliseconds)
@@ -82,8 +48,8 @@ void DCMotor::setRampTime(uint16_t milliseconds)
 void DCMotor::moveToPosition(int32_t position)
 	{
 	_rotator->halt = false;
-	positionError = position - getCurrentPosition();
 	targetPosition = position;
+	positionError = computePositionError(getCurrentPosition());
 	direction = sgn(positionError);
 	targetVelocity = configuration->maxSpeed * direction;
 	currentAcceleration = accelerationFromRampTime() * direction;
@@ -170,31 +136,6 @@ bool DCMotor::isMoving()
 	return currentVelocity != 0;
 	}
 
-/**
- * Gets the last direction of travel.
- * Returns +1 for travel in increasing step position, -1 for decreasing step position.
- * May return 0 if not moving, but isMoving() is the preferred method to check for motion.
- */
-inline int8_t DCMotor::getCurrentDirection() { return direction; }
-
-/*
- * Compute the distance (in steps) needed to decelerate to stop (minimum speed),
- * given the current velocity and acceleration in steps per second.
- */
-int32_t DCMotor::distanceToStop() const
-	{
-	// v² = u² + 2as ∴ s = (v² - u²) / 2a	
-	// v is final velocity
-	// u is initial (current) velocity
-	// a is acceleration
-	// v, u, a are in steps per second
-	const auto v = 0; //minSpeed * direction;
-	const auto u = currentVelocity;
-	const auto a = -currentAcceleration;
-	const auto s = (v * v - u * u) / (2 * a);
-	return int(s);
-	}
-
 /*
 	Computes the linear acceleration required to accelerate from rest to the maximum
 	speed in the ramp time. The returned value is always positive.
@@ -254,44 +195,75 @@ void DCMotor::hardStop()
 	currentAcceleration = 0;
 	currentVelocity = 0;
 	direction = 0;
+	integralError = 0;
+	positionError = 0;
 	}
 /*
  * Decelerate to a stop in the shortest distance allowed by the current acceleration.
  */
 void DCMotor::SoftStop()
 	{
-	//if (!isMoving()) return;
-	//const auto current = getCurrentPosition();
-	//const auto distance = distanceToStop();
-	//targetPosition = current + distance;
 	hardStop();
 	}
 
 void DCMotor::loop()
 	{
 	if (isMoving())
-		ComputeAcceleratedVelocity();
+		computePID();
 	}
 
 /*
 	Recomputes the current motor velocity. Call this from within the main loop.
 */
-void DCMotor::ComputeAcceleratedVelocity()
+void DCMotor::computePID()
 	{
+	// Current Position
+	int32_t currentPosition = getCurrentPosition();
+
+	// Current Time
+	long currentTime = micros();
+	float deltaTime = ((float) (currentTime - previousTime))/( 1.0e6 );
+	previousTime = currentTime;
+	
+	// Current Velocity
 	const float accelerationCurve = getAcceleratedVelocity();
 	const float decelerationCurve = getDeceleratedVelocity();
 	const float computedSpeed = min(abs(accelerationCurve), abs(decelerationCurve));
 	const float constrainedSpeed = constrain(computedSpeed, minSpeed, configuration->maxSpeed);
 	currentVelocity = constrainedSpeed * direction;
-	int32_t currentPosition = getCurrentPosition();
-	int32_t currentPositionError = targetPosition - currentPosition;
-	PIDSettings PIDConstants;
-	PIDConstants = runPID;
-	if (abs(targetPosition - currentPosition) > static_cast<int>(ROTATOR_DEFAULT_DEADZONE)){
-		pwm = calcFromPID(currentPosition, PIDConstants);
-		pwm.pwm = constrain(abs(pwm.pwm), MOTOR_MIN_PWM, 255);
-		_rotator->run(pwm.dir,static_cast<int>(pwm.pwm));
-	} else {
+
+	// Position Error
+	int32_t currentPositionError = computePositionError(currentPosition);
+
+	// Integral Error
+	integralError = integralError + currentPositionError*deltaTime;
+	
+	// Derivative Error
+	float derivativeError = (currentPositionError-positionError)/(deltaTime);
+
+	// Store previous error for future calculation
+	positionError = currentPositionError;
+
+	// Compute PWM / DIR
+	float pwm = PID.DCMOTOR_kp*currentPositionError + PID.DCMOTOR_kd*derivativeError + PID.DCMOTOR_ki*integralError;
+	bool dir = 0;
+	if (pwm < 0)
+		dir = 1;
+	if (abs(currentPositionError) <= static_cast<int>(ROTATOR_DEFAULT_DEADZONE)){ // If positionError is <= deadband, stop
 		hardStop();
+	} else {
+		pwm = constrain(abs(pwm), MOTOR_MIN_PWM, 255);
+		_rotator->run(dir,static_cast<int>(pwm));
 	}
+	}
+
+int32_t DCMotor::computePositionError(int32_t currentPosition)
+	{
+	int32_t positionError = targetPosition - currentPosition;
+	int32_t max_position = limitOfTravel();
+	// Calculate the actual position error based on the shortest path distance to the target
+	int32_t wraparoundError = ((positionError + (max_position/2)) % max_position) - (max_position/2);
+	// Return absolute
+	//return configuration->wraparound = true ? wraparoundError : positionError;
+	return positionError;
 	}

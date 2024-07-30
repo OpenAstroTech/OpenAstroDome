@@ -6,15 +6,15 @@
 #include "LimitSwitch.h"
 #include "OpenAstroDome.h"
 
+ShutterStatus LimitSwitch::shutterStatus;
 
 Motor* LimitSwitch::motor;
-// volatile String LimitSwitch::shutterStatus; // static and volatile because accessed in ISR
 
 LimitSwitch::LimitSwitch(Motor* stepper, uint8_t openLimit, uint8_t closeLimit)
 	: openLimitPin(openLimit), closedLimitPin(closeLimit)
 	{
 	LimitSwitch::motor = stepper;
-	LimitSwitch::shutterStatus = "UNKNOWN";
+	setShutterStatus(Unknown);
 	}
 
 bool LimitSwitch::isOpen() const
@@ -29,85 +29,62 @@ bool LimitSwitch::isClosed() const
 
 bool LimitSwitch::isOpening() const
 	{
-	return shutterStatus == "OPENING" ? true : false;
+	return shutterStatus == Opening;
 	}
 
 bool LimitSwitch::isClosing() const
 	{
-	return shutterStatus == "CLOSING" ? true : false;
+	return shutterStatus == Closing;
 	}
 
-void LimitSwitch::setShutterStatus(String status)
-	{
-		if (status == "OPENING" || status == "CLOSING" || status == "UNKNOWN")
-			{
-				shutterStatus = status;
-			}
-	}
+void LimitSwitch::setShutterStatus(ShutterStatus newStatus)
+{
+	shutterStatus = newStatus;
+}
+
+ShutterStatus LimitSwitch::getShutterStatus()
+{
+	return shutterStatus;
+}
 
 void LimitSwitch::onCloseLimitReached()
 	{
 	motor->SoftStop();
 	motor->SetCurrentPosition(0);
-	shutterStatus = "CLOSED";
-	/*if (closeTriggered)
-		return;
-	if (motor->getCurrentVelocity() < 0)
-		{
-		closeTriggered = true;
-		motor->SetCurrentPosition(SHUTTER_LIMIT_STOPPING_DISTANCE);
-		motor->moveToPosition(0);
-		}*/
+	setShutterStatus(Closed);
 	}
 
 void LimitSwitch::onOpenLimitReached()
 	{
 	motor->SoftStop();
 	motor->SetCurrentPosition(SHUTTER_FULL_OPEN_DEFAULT);
-	shutterStatus = "OPEN";
-	/*if (motor->getCurrentVelocity() > 0)
-		{
-		const auto stopPosition = motor->getCurrentPosition() + SHUTTER_LIMIT_STOPPING_DISTANCE;
-		motor->moveToPosition(stopPosition);
-		//if (stopPosition < motor->limitOfTravel())
-		//	motor->SetLimitOfTravel(stopPosition);
-		}*/
+	setShutterStatus(Open);
 	}
 
 void LimitSwitch::onMotorStopped()
 	{
-	shutterStatus = "UNKNOWN";
+	setShutterStatus(Unknown);
 	}
 
-std::string LimitSwitch::loop()
+void LimitSwitch::loop()
 	{
 	if (isOpen()){
-		if (shutterStatus == "OPENING" || shutterStatus == "UNKNOWN"){
+		if (shutterStatus != Closing){
 			onOpenLimitReached();
-			return "open";
 		}
-		else if(shutterStatus == "CLOSED"){
-			onOpenLimitReached();
-			return "open";
-		}
+		motor->SetCurrentPosition(SHUTTER_FULL_OPEN_DEFAULT);
 	}
 	else if (isClosed()){
-		if (shutterStatus == "CLOSING" || shutterStatus == "UNKNOWN"){
+		if (shutterStatus != Opening){
 			onCloseLimitReached();
-			return "closed";
 		}
-		else if (shutterStatus == "OPEN"){
-			onCloseLimitReached();
-			return "closed";
-		}
+		motor->SetCurrentPosition(0);
 	}
 	else if (!isClosed() && !isOpen()){
-		if (shutterStatus == "OPEN" || shutterStatus == "CLOSED"){
-			shutterStatus = "UNKNOWN";
-			return "open";
+		if (shutterStatus == Open || shutterStatus == Closed){
+			setShutterStatus(Unknown);
 		}
 	}
-	return "unknown";
 	}
 
 void LimitSwitch::init() const
@@ -115,15 +92,13 @@ void LimitSwitch::init() const
 	pinMode(openLimitPin, INPUT_PULLUP);
 	pinMode(closedLimitPin, INPUT_PULLUP);
 	if (isOpen()){
-		shutterStatus = "OPEN";
+		setShutterStatus(Open);
 		motor->SetCurrentPosition(SHUTTER_FULL_OPEN_DEFAULT);
 	} else if (isClosed()){
-		shutterStatus = "CLOSED";
+		setShutterStatus(Closed);
 		motor->SetCurrentPosition(0);
 	} else {
-		shutterStatus = "UNKNOWN";
+		setShutterStatus(Unknown);
 		motor->SetCurrentPosition(1000);
 	}
-	//attachInterrupt(digitalPinToInterrupt(openLimitPin), onOpenLimitReached, FALLING);
-	//attachInterrupt(digitalPinToInterrupt(closedLimitPin), onCloseLimitReached, FALLING);
 	}

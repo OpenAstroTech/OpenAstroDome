@@ -104,6 +104,9 @@ void HandleSerialCommunications()
 // the setup function runs once when you press reset or power the board
 void setup()
 {
+#if ROTATOR_MOTOR_TYPE == DC_MOTOR
+	stepper.setWraparound(true); // Sets rotator motor to wraparound position from max to zero and vice versa
+#endif
 	stepper.releaseMotor();
 	pinMode(CLOCKWISE_BUTTON_PIN, INPUT_PULLUP);
 	pinMode(COUNTERCLOCKWISE_BUTTON_PIN, INPUT_PULLUP);
@@ -154,13 +157,6 @@ void ProcessManualControls()
 	counterclockwiseButtonLastState = counterclockwiseButtonPressed;
 }
 
-void heartbeat()
-{
-	static bool state = false;
-	state = !state;
-	digitalWrite(LED_BUILTIN, state ? HIGH : LOW);
-}
-
 // the loop function runs over and over again until power down or reset
 void loop()
 {
@@ -172,8 +168,6 @@ void loop()
 	if (periodicTasks.Expired())
 	{
 		periodicTasks.SetDuration(250);
-		//Serial.println(home.isHome());
-		//heartbeat();
 
 		if (stepper.isMoving())
 			std::cout << "P" << std::dec << commandProcessor.getPositionInWholeSteps() << std::endl;

@@ -112,7 +112,7 @@ void CommandProcessor::HandleOP(const Command &command)
 	if (!(limitSwitches.isOpen() || battery.lowVolts()))
 	{
 		sendOpenNotification();
-		limitSwitches.setShutterStatus("OPENING");
+		limitSwitches.setShutterStatus(Opening);
 		motor.moveToPosition(settings.motor.maxPosition);
 
 	}
@@ -123,7 +123,7 @@ void CommandProcessor::HandleCL(const Command &command)
 	if (!limitSwitches.isClosed())
 	{
 		sendCloseNotification();
-		limitSwitches.setShutterStatus("CLOSING");
+		limitSwitches.setShutterStatus(Closing);
 		motor.moveToPosition(0);
 	}
 }
@@ -158,7 +158,7 @@ void CommandProcessor::HandleSW(const Command &command)
 {
 	motor.SetCurrentPosition(1000);
 	motor.hardStop();
-	limitSwitches.setShutterStatus("UNKNOWN");
+	limitSwitches.setShutterStatus(Unknown);
 }
 
 void CommandProcessor::HandleZW(const Command &command)

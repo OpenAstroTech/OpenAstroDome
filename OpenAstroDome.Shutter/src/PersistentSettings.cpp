@@ -8,6 +8,7 @@
 PersistentSettings::PersistentSettings() :
 	motor(MotorSettings{
 			SHUTTER_FULL_OPEN_DEFAULT,	// Maximum position in microsteps
+			false,						// Wraparound position from max to zero
 			0,							// Current position in microsteps
 			MOTOR_RAMP_TIME,			// Ramp time to full speed in milliseconds
 			SHUTTER_DEFAULT_SPEED,		// Maximum speed in microsteps per second

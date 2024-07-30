@@ -20,23 +20,19 @@ constexpr int32_t MinStepPosition = -2000000000L;
 #define MIN_RAMP_TIME (100)     // Minimum ramp up/down time in milliseconds
 
 // DC Motor defaults
-#define MOTOR_BOARD     (MOTOR_CONTROLLER_SHIELDMD10)
+#define MOTOR_BOARD     (MOTOR_CONTROLLER_BTS7960)
 #define ENCODER_PIN_A    (2)   // Encoder
 #define ENCODER_PIN_B    (3)   // Encoder
-#define MOTOR_MIN_PWM   (100)    // Minimum PWM setting needed to move the motor
-// Acceleration PID constants
-const float DCMOTOR_kp_A = 0.00;
-const float DCMOTOR_ki_A = 0.1;
-const float DCMOTOR_kd_A = 0.00;
-// Running PID constants
-const float DCMOTOR_kp_R = 5.0;
-const float DCMOTOR_ki_R = 1.0;
-const float DCMOTOR_kd_R = 1.0;
+#define MOTOR_MIN_PWM   (150)    // Minimum PWM setting needed to move the motor
+// PID constants
+const float DCMOTOR_kp = 5.0;
+const float DCMOTOR_ki = 1.0;
+const float DCMOTOR_kd = 1.0;
 // BTS7960
-#define MOTOR_ENABLE_PIN_L  (7)
-#define MOTOR_ENABLE_PIN_R  (8)
-#define MOTOR_PWM_PIN_L (9)
-#define MOTOR_PWM_PIN_R (10)
+#define MOTOR_ENABLE_PIN_L  (52)
+#define MOTOR_ENABLE_PIN_R  (50)
+#define MOTOR_PWM_PIN_L (51)
+#define MOTOR_PWM_PIN_R (53)
 // SHEILDMD10
 #define MOTOR_DIRECTION_PIN (8)
 #define MOTOR_PWM_PIN (9)

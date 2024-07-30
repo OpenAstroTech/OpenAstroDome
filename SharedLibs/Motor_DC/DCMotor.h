@@ -25,44 +25,35 @@ struct PIDSettings
 		float DCMOTOR_kd;
 	};
 
-struct PWMSettings
-	{
-		float pwm;
-		bool dir;
-	};
-
 class DCMotor : public Motor
 	{
 	public:
 		DCMotor(uint8_t stepPin, uint8_t enablePin, uint8_t directionPin, MotorSettings& settings);
-		virtual void Step(bool state) final;
-		//void MoveAtVelocity(float stepsPerSecond);
-		void energizeMotor() const;
 		void releaseMotor();
 		void setRampTime(uint16_t milliseconds);
 		virtual void hardStop();
 		virtual void SoftStop();
 		virtual void loop();
-		void ComputeAcceleratedVelocity();
+		void computePID();
 		virtual void moveToPosition(int32_t position);
 		void SetCurrentPosition(int32_t position);
 		void SetLimitOfTravel(uint32_t limit);
 		void setMaximumSpeed(uint16_t speed);
+		void setWraparound(bool wraparound);
 		float getCurrentVelocity() const;
 		virtual int32_t getCurrentPosition();
-	int32_t midpointPosition() const;
-	int32_t limitOfTravel() const;
-	uint16_t getMaximumSpeed();
-	uint16_t getMinimumSpeed();
+		int32_t midpointPosition() const;
+		int32_t limitOfTravel() const;
+		uint16_t getMaximumSpeed();
+		uint16_t getMinimumSpeed();
 		virtual bool isMoving();
-		virtual int8_t getCurrentDirection();
 		int32_t distanceToStop() const;
 		MotorSettings* configuration;
 		int32_t getTargetPosition();
 
 	private:
 		#if MOTOR_BOARD == MOTOR_CONTROLLER_BTS7960
-			BTS7960::Motor* _rotator;
+			BTS7960* _rotator;
 		#elif MOTOR_BOARD == MOTOR_CONTROLLER_SHIELDMD10
 			SHIELDMD10* _rotator;
 		#endif
@@ -75,13 +66,11 @@ class DCMotor : public Motor
 		float getAcceleratedVelocity() const;
 		float getDeceleratedVelocity() const;
 		float accelerationFromRampTime();
+		int32_t computePositionError(int32_t currentPosition);
 		float positionError;
 		float previousTime;
 		float integralError;
-		PWMSettings calcFromPID(int32_t currentPosition, PIDSettings PIDConstants);
-		PIDSettings accelerationPID;
-		PIDSettings runPID;
-		PWMSettings pwm;
+		PIDSettings PID;
 		unsigned long PIDtimer;
 	};
 

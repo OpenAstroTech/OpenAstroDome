@@ -21,6 +21,7 @@
 void onMotorStopped(); // Forward reference
 
 Timer periodicTasks;
+Timer limitSwitchStatusTimer;
 Timer limitSwitchTimer;
 auto stepGenerator = CounterTimer1StepGenerator();
 auto settings = PersistentSettings::Load();
@@ -124,7 +125,6 @@ void HandleSerialCommunications()
 void setup()
 {
 	stepper.releaseMotor();
-	stepper.registerStopHandler(onMotorStopped);
 	pinMode(CLOCKWISE_BUTTON_PIN, INPUT_PULLUP);
 	pinMode(COUNTERCLOCKWISE_BUTTON_PIN, INPUT_PULLUP);
 	hostReceiveBuffer.reserve(HOST_SERIAL_RX_BUFFER_SIZE);
@@ -136,7 +136,8 @@ void setup()
 	xbeeSerial.begin(9600);
 
 	periodicTasks.SetDuration(1000);
-	limitSwitchTimer.SetDuration(1000);
+	limitSwitchStatusTimer.SetDuration(1000);
+	limitSwitchTimer.SetDuration(100);
 	interrupts();
 	machine.ChangeState(new XBeeStartupState(machine));
 	machine.ChangeState(new XBeeOnlineState(machine));
@@ -159,11 +160,15 @@ void loop()
 	if (limitSwitchTimer.Expired())
 	{
 		limitSwitchTimer.SetDuration(100);
-		status = limitSwitches.loop();
-		if (status == "open"){
+		limitSwitches.loop();
+	}
+	if (limitSwitchStatusTimer.Expired())
+	{
+		limitSwitchStatusTimer.SetDuration(1000);
+		if (limitSwitches.isOpen()){
 			commandProcessor.sendOpenNotification();
 		}
-		else if (status == "closed"){
+		else if (limitSwitches.isClosed()){
 			commandProcessor.sendCloseNotification();
 		}
 	}

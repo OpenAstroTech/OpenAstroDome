@@ -9,7 +9,8 @@
 PersistentSettings::PersistentSettings() :
 	motor(MotorSettings
 		{
-			ROTATOR_MAX_POSITION,	// Maximum position in microsteps
+			ROTATOR_FULL_REVOLUTION_MICROSTEPS,	// Maximum position in microsteps
+			true,					// Wraparound position from max to zero
 			ROTATOR_HOME_POSITION,	// Current position in microsteps
 			MOTOR_RAMP_TIME,		// Ramp time to full speed in milliseconds
 			ROTATOR_DEFAULT_SPEED,	// Maximum speed in microsteps per second

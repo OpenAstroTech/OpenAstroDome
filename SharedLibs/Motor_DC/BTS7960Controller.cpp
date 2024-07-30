@@ -1,22 +1,24 @@
 #include "BTS7960Controller.h"
 
-BTS7960::BTS7960(uint8_t L_EN, uint8_t R_EN, uint8_t L_PWM, uint8_t R_PWM)
+BTS7960::BTS7960()
 {
-    _R_PWM = R_PWM;
-    _L_PWM = L_PWM;
-    _L_EN  = L_EN;
-    _R_EN  = R_EN;
+    _R_PWM = MOTOR_PWM_PIN_R;
+    _L_PWM = MOTOR_PWM_PIN_L;
+    _L_EN  = MOTOR_ENABLE_PIN_L;
+    _R_EN  = MOTOR_ENABLE_PIN_R;
     pinMode(_R_PWM, OUTPUT);
     pinMode(_L_PWM, OUTPUT);
     pinMode(_L_EN, OUTPUT);
     pinMode(_R_EN, OUTPUT);
+    digitalWrite(_L_EN, HIGH);
+    digitalWrite(_R_EN, HIGH);
     _isRunning = false;
     halt = true;
 }
 
 void BTS7960::run(int dir, int pwm)
 {
-    Enable();
+
     if (dir = 0){
         analogWrite(_L_PWM, 0);
         delayMicroseconds(100);
@@ -29,28 +31,11 @@ void BTS7960::run(int dir, int pwm)
     _isRunning = true;
 }
 
-void BTS7960::Enable()
-{
-    digitalWrite(_L_EN, 1);
-    //digitalWrite(_R_EN, 1);
-    if (_R_EN != 0)
-        digitalWrite(_R_EN, HIGH);
-}
-
-void BTS7960::Disable()
-{
-    digitalWrite(_L_EN, 0);
-    //digitalWrite(_R_EN,0);
-    if (_R_EN != 0)
-        digitalWrite(_R_EN, LOW);
-}
-
 void BTS7960::stop()
 {
     halt = true;
     analogWrite(_L_PWM, LOW);
     analogWrite(_R_PWM, LOW);
-    Disable();
     _isRunning = false;
 }
 

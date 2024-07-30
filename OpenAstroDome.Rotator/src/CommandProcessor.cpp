@@ -160,12 +160,18 @@ void CommandProcessor::HandleAR(const Command &command) const
 
 void CommandProcessor::rotateToMicrostepPosition(const int32_t target) const
 {
-	const auto currentPosition = rotator.getCurrentPosition();
-	const auto delta = target - currentPosition;
-	const auto direction = sgn(delta);
-	if (abs(delta) >= settings.deadZone)
+	const int32_t currentPosition = rotator.getCurrentPosition();
+	const int32_t max_position = ROTATOR_FULL_REVOLUTION_MICROSTEPS;
+	int32_t positionError = target - currentPosition;
+	// Calculate the actual position error based on the shortest path distance to the target
+	int32_t wraparoundError = ((positionError + (max_position/2)) % max_position) - (max_position/2);
+
+	const auto direction = sgn(wraparoundError);
+	if (abs(wraparoundError) >= settings.deadZone)
 	{
-		HomeSensor::cancelHoming();
+		if (HomeSensor::homingInProgress()){
+			HomeSensor::cancelHoming();
+		}
 		sendDirection(direction);
 		rotator.moveToPosition(target);
 	}
